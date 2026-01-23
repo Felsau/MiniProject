@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -13,12 +14,12 @@ export default function Home() {
         </p>
 
         <div className="mt-8">
-          <a
-            href="#"
+          <Link
+            href="/about"
             className="inline-block rounded-full bg-black px-6 py-3 text-white transition hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
           >
-            เริ่มต้นใช้งาน
-          </a>
+            ไปหน้า About
+          </Link>
         </div>
       </main>
     </div>
