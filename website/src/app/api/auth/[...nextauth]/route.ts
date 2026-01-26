@@ -1,9 +1,10 @@
-import NextAuth from "next-auth"
+import NextAuth, { AuthOptions } from "next-auth" // เพิ่ม AuthOptions
 import CredentialsProvider from "next-auth/providers/credentials"
 import prisma from "@/lib/prisma"
 import bcrypt from "bcrypt"
 
-const handler = NextAuth({
+// 1. แยก Config ออกมาเป็นตัวแปร และใส่ export
+export const authOptions: AuthOptions = {
     providers: [
         CredentialsProvider({
             name: 'Credentials',
@@ -15,17 +16,14 @@ const handler = NextAuth({
                 const user = await prisma.user.findUnique({
                     where: { username: credentials?.username }
                 })
-
                 if (!user) return null
-
                 const isMatch = await bcrypt.compare(credentials!.password, user.password)
-
+                
                 if (isMatch) {
-                    // ส่ง Role ออกไปให้ JWT
                     return {
                         id: user.id.toString(),
                         name: user.username,
-                        role: user.role 
+                        role: user.role
                     }
                 }
                 return null
@@ -34,24 +32,21 @@ const handler = NextAuth({
     ],
     callbacks: {
         async jwt({ token, user }) {
-            // รับไม้ผลัดที่ 1: จาก Authorize -> JWT
-            if (user) {
-                token.role = user.role
-            }
+            if (user) token.role = (user as any).role
             return token
         },
         async session({ session, token }) {
-            // รับไม้ผลัดที่ 2: จาก JWT -> Session (หน้าบ้าน)
             if (session.user) {
-                session.user.role = token.role // ตอนนี้ TypeScript จะไม่แดงแล้ว!
+                (session.user as any).role = token.role
             }
             return session
         }
     },
-    pages: {
-        signIn: '/login',
-    },
+    pages: { signIn: '/login' },
     secret: process.env.NEXTAUTH_SECRET,
-})
+}
+
+// 2. เรียกใช้ตรงนี้
+const handler = NextAuth(authOptions)
 
 export { handler as GET, handler as POST }

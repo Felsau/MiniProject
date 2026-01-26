@@ -1,15 +1,18 @@
 import { getServerSession } from "next-auth"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { redirect } from "next/navigation"
 import LogoutButton from "@/components/LogoutButton" // ถ้าคุณแยกปุ่ม Logout ไว้
+import Link from "next/link"
 
 export default async function DashboardPage() {
-  const session = await getServerSession()
+
+  const session = await getServerSession(authOptions)
 
   // 1. ความปลอดภัยขั้นแรก: ถ้ายังไม่ Login ให้ดีดกลับหน้า Login
   if (!session) {
     redirect("/login")
   }
-console.log("Full Session Data:", JSON.stringify(session, null, 2))
+  console.log("Full Session Data:", JSON.stringify(session, null, 2))
   // 2. ดึง Role ออกมา (ใช้ @ts-ignore เพื่อเลี่ยงตัวแดงของ TypeScript ในบางเคส)
   // @ts-ignore
   const role = session.user?.role
@@ -28,15 +31,18 @@ console.log("Full Session Data:", JSON.stringify(session, null, 2))
 
         {/* 3. ส่วนแยกเนื้อหาตาม Role */}
         <div className="grid grid-cols-1 gap-6">
-          
+
           {/* --- ส่วนสำหรับ ADMIN (จัดการระบบ) --- */}
           {role === "ADMIN" && (
             <div className="bg-purple-50 border-2 border-purple-200 p-6 rounded-xl">
               <h2 className="text-xl font-bold text-purple-800 mb-4">เมนูผู้ดูแลระบบ (Admin Control)</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <a href="/register" className="bg-purple-600 text-white p-4 rounded-lg text-center hover:bg-purple-700 transition">
+                <Link
+                  href="/register"
+                  className="bg-purple-600 text-white p-4 rounded-lg text-center hover:bg-purple-700 transition"
+                >
                   สร้างบัญชีพนักงานใหม่
-                </a>
+                </Link>
                 <button className="bg-white border-2 border-purple-600 text-purple-600 p-4 rounded-lg hover:bg-purple-50 transition">
                   จัดการสิทธิ์ผู้ใช้งาน
                 </button>
