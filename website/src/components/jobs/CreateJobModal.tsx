@@ -1,10 +1,14 @@
 "use client";
 
+type Department = {
+  dept_id: number;
+  dept_name: string;
+};
+
 type Props = {
   isOpen: boolean;
-
   jobTitle: string;
-  department: string;
+  department: number;
   jobLevel: string;
   location: string;
   description: string;
@@ -16,10 +20,10 @@ type Props = {
   salaryMin: string;
   salaryMax: string;
   closeDate: string;
-  departments: Array<{ dept_id: number; dept_name: string }>;
+  departments: Department[];
 
   onChangeTitle: (v: string) => void;
-  onChangeDepartment: (v: string) => void;
+  onChangeDepartment: (v: number) => void;
   onChangeLevel: (v: string) => void;
   onChangeLocation: (v: string) => void;
   onChangeDescription: (v: string) => void;
@@ -31,126 +35,114 @@ type Props = {
   onChangeSalaryMin: (v: string) => void;
   onChangeSalaryMax: (v: string) => void;
   onChangeCloseDate: (v: string) => void;
-
   onClose: () => void;
   onSubmit: () => void;
 };
 
-export default function CreateJobModal({
-  isOpen,
-  jobTitle,
-  department,
-  jobLevel,
-  location,
-  description,
-  responsibilities,
-  qualifications,
-  specialConditions,
-  hiringCount,
-  employmentType,
-  salaryMin,
-  salaryMax,
-  closeDate,
-  departments,
-  onChangeTitle,
-  onChangeDepartment,
-  onChangeLevel,
-  onChangeLocation,
-  onChangeDescription,
-  onChangeResponsibilities,
-  onChangeQualifications,
-  onChangeSpecialConditions,
-  onChangeHiringCount,
-  onChangeEmploymentType,
-  onChangeSalaryMin,
-  onChangeSalaryMax,
-  onChangeCloseDate,
-  onClose,
-  onSubmit,
-}: Props) {
-  if (!isOpen) return null;
+const baseInput =
+  "w-full rounded-xl border border-slate-300 bg-white " +
+  "px-3 py-2 text-sm text-slate-800 " +
+  "placeholder:text-slate-400 " +
+  "focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 " +
+  "transition";
 
-  console.log("Departments in modal:", departments);
+const InputField = ({ label, value, onChange, type = "text" }: any) => (
+  <div>
+    <label className="text-sm font-medium text-slate-700 mb-1 block">
+      {label}
+    </label>
+    <input
+      type={type}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={baseInput}
+    />
+  </div>
+);
 
-  const InputField = ({ label, value, onChange, type = "text", placeholder = "" }: any) => (
-    <div>
-      <label className="mb-1 block font-semibold text-xs" style={{ color: '#1E293B' }}>{label}</label>
-      <input
-        type={type}
-        placeholder={placeholder}
-        className="w-full rounded border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 transition"
-        style={{ borderColor: '#E2E8F0', color: '#0F172A' }}
-        onFocus={(e) => (e.currentTarget.style.borderColor = '#2563EB', e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)')}
-        onBlur={(e) => (e.currentTarget.style.borderColor = '#E2E8F0', e.currentTarget.style.boxShadow = 'none')}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    </div>
-  );
+const TextareaField = ({ label, value, onChange, rows = 3 }: any) => (
+  <div>
+    <label className="text-sm font-medium text-slate-700 mb-1 block">
+      {label}
+    </label>
+    <textarea
+      rows={rows}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={baseInput}
+    />
+  </div>
+);
 
-  const TextareaField = ({ label, value, onChange, rows = 2 }: any) => (
-    <div className="col-span-full">
-      <label className="mb-1 block font-semibold text-xs" style={{ color: '#1E293B' }}>{label}</label>
-      <textarea
-        rows={rows}
-        className="w-full rounded border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 transition"
-        style={{ borderColor: '#E2E8F0', color: '#0F172A' }}
-        onFocus={(e) => (e.currentTarget.style.borderColor = '#2563EB', e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)')}
-        onBlur={(e) => (e.currentTarget.style.borderColor = '#E2E8F0', e.currentTarget.style.boxShadow = 'none')}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    </div>
-  );
+export default function CreateJobModal(props: Props) {
+  if (!props.isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto py-4 px-4" style={{ backgroundColor: 'rgba(15, 23, 42, 0.5)' }}>
-      <div className="w-full max-w-2xl rounded-xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto" style={{ backgroundColor: '#F8FAFC' }}>
-        <h2 className="mb-6 text-lg font-bold sticky top-0 pb-4" style={{ color: '#2563EB', borderBottom: '2px solid #E2E8F0' }}>เพิ่มตำแหน่งงาน</h2>
+    <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center px-4 z-50">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          props.onSubmit();
+        }}
+        className="bg-[#F8FAFF] w-full max-w-2xl rounded-2xl p-6 shadow-xl"
+      >
+        <h2 className="text-xl font-semibold text-sky-600 mb-5">
+          ➕ เพิ่มตำแหน่งงาน
+        </h2>
 
-        {/* SECTION 1: Basic Info */}
-        <h3 className="mb-3 mt-4 text-xs font-semibold uppercase" style={{ color: '#38BDF8' }}>ข้อมูลพื้นฐาน</h3>
-        <InputField label="ชื่อตำแหน่ง" value={jobTitle} onChange={onChangeTitle} />
-        
-        <div className="grid grid-cols-2 gap-4 mt-4 mb-4">
+        <InputField
+          label="ชื่อตำแหน่ง"
+          value={props.jobTitle}
+          onChange={props.onChangeTitle}
+        />
+
+        <div className="grid grid-cols-2 gap-4 mt-4">
           <div>
-            <label className="mb-1 block font-semibold text-xs" style={{ color: '#1E293B' }}>แผนก</label>
+            <label className="text-sm font-medium text-slate-700">
+              แผนก
+            </label>
             <select
-              className="w-full rounded border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 transition"
-              style={{ borderColor: '#E2E8F0', color: '#0F172A' }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = '#2563EB', e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)')}
-              onBlur={(e) => (e.currentTarget.style.borderColor = '#E2E8F0', e.currentTarget.style.boxShadow = 'none')}
-              value={department}
-              onChange={(e) => onChangeDepartment(e.target.value)}
+              value={props.department}
+              onChange={(e) =>
+                props.onChangeDepartment(Number(e.target.value))
+              }
+              className={baseInput}
             >
-              <option value="">-- เลือกแผนก --</option>
-              {departments && departments.length > 0 ? (
-                departments.map((dept) => (
-                  <option key={dept.dept_id} value={String(dept.dept_id)}>
-                    {dept.dept_name}
-                  </option>
-                ))
-              ) : (
-                <option disabled>ไม่มีแผนกให้เลือก</option>
-              )}
+              <option value={0}>-- เลือกแผนก --</option>
+              {props.departments.map((d) => (
+                <option key={d.dept_id} value={d.dept_id}>
+                  {d.dept_name}
+                </option>
+              ))}
             </select>
           </div>
-          <InputField label="ระดับงาน" value={jobLevel} onChange={onChangeLevel} />
+
+          <InputField
+            label="ระดับงาน"
+            value={props.jobLevel}
+            onChange={props.onChangeLevel}
+          />
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <InputField label="สถานที่ทำงาน" value={location} onChange={onChangeLocation} />
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <InputField
+            label="สถานที่ทำงาน"
+            value={props.location}
+            onChange={props.onChangeLocation}
+          />
+
           <div>
-            <label className="mb-1 block font-semibold text-xs" style={{ color: '#1E293B' }}>ประเภทการจ้างงาน</label>
+            <label className="text-sm font-medium text-slate-700">
+              ประเภทการจ้างงาน
+            </label>
             <select
-              className="w-full rounded border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 transition"
-              style={{ borderColor: '#E2E8F0', color: '#0F172A' }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = '#2563EB', e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)')}
-              onBlur={(e) => (e.currentTarget.style.borderColor = '#E2E8F0', e.currentTarget.style.boxShadow = 'none')}
-              value={employmentType}
-              onChange={(e) => onChangeEmploymentType(e.target.value)}
+              value={props.employmentType}
+              onChange={(e) =>
+                props.onChangeEmploymentType(e.target.value)
+              }
+              className={baseInput}
             >
-              <option value="">-- เลือกประเภท --</option>
+              <option value="">-- เลือก --</option>
               <option value="Full-time">Full-time</option>
               <option value="Part-time">Part-time</option>
               <option value="Contract">Contract</option>
@@ -159,79 +151,61 @@ export default function CreateJobModal({
           </div>
         </div>
 
-        {/* SECTION 2: Employment & Salary */}
-        <h3 className="mb-3 mt-5 text-xs font-semibold uppercase" style={{ color: '#38BDF8' }}>สัญญาและค่าตอบแทน</h3>
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <InputField label="จำนวนรับ" value={hiringCount} onChange={onChangeHiringCount} type="number" />
-          <div>
-            <label className="mb-1 block font-semibold text-xs" style={{ color: '#1E293B' }}>เงินเดือนต่ำสุด</label>
-            <div className="flex items-center gap-1.5">
-              <input
-                type="number"
-                placeholder="0"
-                className="w-[70%] rounded border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 transition"
-                style={{ borderColor: '#E2E8F0', color: '#0F172A' }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#2563EB', e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = '#E2E8F0', e.currentTarget.style.boxShadow = 'none')}
-                value={salaryMin}
-                onChange={(e) => onChangeSalaryMin(e.target.value)}
-              />
-              <span className="text-xs font-medium whitespace-nowrap" style={{ color: '#64748B' }}>บาท</span>
-            </div>
-          </div>
-          <div>
-            <label className="mb-1 block font-semibold text-xs" style={{ color: '#1E293B' }}>เงินเดือนสูงสุด</label>
-            <div className="flex items-center gap-1.5">
-              <input
-                type="number"
-                placeholder="0"
-                className="w-[70%] rounded border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 transition"
-                style={{ borderColor: '#E2E8F0', color: '#0F172A' }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#2563EB', e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = '#E2E8F0', e.currentTarget.style.boxShadow = 'none')}
-                value={salaryMax}
-                onChange={(e) => onChangeSalaryMax(e.target.value)}
-              />
-              <span className="text-xs font-medium whitespace-nowrap" style={{ color: '#64748B' }}>บาท</span>
-            </div>
-          </div>
+        <div className="grid grid-cols-3 gap-4 mt-4">
+          <InputField
+            label="จำนวนรับ"
+            value={props.hiringCount}
+            onChange={props.onChangeHiringCount}
+            type="number"
+          />
+          <InputField
+            label="เงินเดือนต่ำสุด"
+            value={props.salaryMin}
+            onChange={props.onChangeSalaryMin}
+            type="number"
+          />
+          <InputField
+            label="เงินเดือนสูงสุด"
+            value={props.salaryMax}
+            onChange={props.onChangeSalaryMax}
+            type="number"
+          />
         </div>
 
-        {/* SECTION 3: Job Details */}
-        <h3 className="mb-3 mt-5 text-xs font-semibold uppercase" style={{ color: '#38BDF8' }}>รายละเอียดงาน</h3>
-        <TextareaField label="คำอธิบายงาน" value={description} onChange={onChangeDescription} rows={5} />
-        <div className="mt-3 mb-4">
-          <TextareaField label="หน้าที่ความรับผิดชอบ" value={responsibilities} onChange={onChangeResponsibilities} rows={5} />
-        </div>
-        <div className="mt-3 mb-4">
-          <TextareaField label="คุณสมบัติผู้สมัคร" value={qualifications} onChange={onChangeQualifications} rows={5} />
+        <div className="mt-4 space-y-3">
+          <TextareaField
+            label="รายละเอียดงาน"
+            value={props.description}
+            onChange={props.onChangeDescription}
+          />
+          <TextareaField
+            label="หน้าที่รับผิดชอบ"
+            value={props.responsibilities}
+            onChange={props.onChangeResponsibilities}
+          />
+          <TextareaField
+            label="คุณสมบัติ"
+            value={props.qualifications}
+            onChange={props.onChangeQualifications}
+          />
         </div>
 
-        {/* SECTION 4: Management */}
-        <h3 className="mb-3 mt-5 text-xs font-semibold uppercase" style={{ color: '#38BDF8' }}>การจัดการ</h3>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <TextareaField label="เงื่อนไขพิเศษ/พนักงานภายใน" value={specialConditions} onChange={onChangeSpecialConditions} rows={1} />
-          <InputField label="วันปิดรับสมัคร" value={closeDate} onChange={onChangeCloseDate} type="date" />
-        </div>
-
-        <div className="flex justify-end gap-2">
+        <div className="mt-6 flex justify-end gap-3">
           <button
-            onClick={onClose}
-            className="rounded px-4 py-2 text-sm"
-            style={{ backgroundColor: '#E2E8F0', color: '#1E293B' }}
+            type="button"
+            onClick={props.onClose}
+            className="px-4 py-2 rounded-xl bg-slate-200 text-slate-700 hover:bg-slate-300 transition"
           >
             ยกเลิก
           </button>
-
           <button
-            onClick={onSubmit}
-            className="rounded px-4 py-2 text-white font-semibold hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: '#2563EB' }}
+            type="submit"
+            className="px-5 py-2 rounded-xl bg-sky-500 text-white hover:bg-sky-600 transition"
           >
             บันทึก
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

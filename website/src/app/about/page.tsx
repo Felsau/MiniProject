@@ -3,16 +3,23 @@
 import { useEffect, useState } from "react";
 import JobGrid from "@/components/jobs/JobGrid";
 import CreateJobModal from "@/components/jobs/CreateJobModal";
-import { getJobsAction, createJobAction, getDepartmentsAction } from "@/actions/jobActions";
+import {
+  getJobsAction,
+  createJobAction,
+  getDepartmentsAction,
+} from "@/actions/jobActions";
 import { Job } from "@/components/jobs/types";
 
 export default function Page() {
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [departments, setDepartments] = useState<Array<{ dept_id: number; dept_name: string }>>([]);
+  const [departments, setDepartments] = useState<
+    { dept_id: number; dept_name: string }[]
+  >([]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [jobTitle, setJobTitle] = useState("");
-  const [departmentId, setDepartmentId] = useState<number | "">("");
+  const [departmentId, setDepartmentId] = useState<number>(0);
   const [jobLevel, setJobLevel] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
@@ -25,53 +32,40 @@ export default function Page() {
   const [salaryMax, setSalaryMax] = useState("");
   const [closeDate, setCloseDate] = useState("");
 
-  const fetchJobs = async () => {
-    const data = await getJobsAction();
-    setJobs(data as Job[]);
+  const fetchData = async () => {
+    const [jobsData, deptData] = await Promise.all([
+      getJobsAction(),
+      getDepartmentsAction(),
+    ]);
+    setJobs(jobsData as Job[]);
+    setDepartments(deptData);
   };
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        console.log("Loading data...");
-        const jobsData = await getJobsAction();
-        const departmentsData = await getDepartmentsAction();
-        console.log("Jobs Data:", jobsData);
-        console.log("Departments Data:", departmentsData);
-        console.log("Departments type:", typeof departmentsData);
-        setJobs(jobsData as Job[]);
-        setDepartments(departmentsData as Array<{ dept_id: number; dept_name: string }>);
-      } catch (error) {
-        console.error("Error loading data:", error);
-      }
-    };
-    loadData();
+    fetchData();
   }, []);
 
   const handleCreateJob = async () => {
-    if (!departmentId) {
-      alert("Please select a department");
-      return;
-    }
+    if (!departmentId) return alert("กรุณาเลือกแผนก");
 
     await createJobAction({
       job_title: jobTitle,
-      department_id: Number(departmentId),
+      department_id: departmentId,
       job_level: jobLevel,
       work_location: location,
       job_description: description,
       responsibilities,
       qualifications,
       special_conditions: specialConditions,
-      hiring_count: hiringCount ? Number(hiringCount) : 1,
+      hiring_count: Number(hiringCount),
       employment_type: employmentType,
-      salary_min: salaryMin ? Number(salaryMin) : undefined,
-      salary_max: salaryMax ? Number(salaryMax) : undefined,
+      salary_min: Number(salaryMin),
+      salary_max: Number(salaryMax),
       close_date: closeDate,
     });
 
     setJobTitle("");
-    setDepartmentId("");
+    setDepartmentId(0);
     setJobLevel("");
     setLocation("");
     setDescription("");
@@ -85,27 +79,50 @@ export default function Page() {
     setCloseDate("");
     setIsModalOpen(false);
 
-    fetchJobs();
+    fetchData();
   };
 
   return (
-    <div className="min-h-screen p-10" style={{ backgroundColor: '#F8FAFC' }}>
-      <h1 className="mb-4 text-3xl font-bold" style={{ color: '#0F172A' }}>ระบบรับสมัครงาน</h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-sky-100 p-10">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-slate-800">
+          ระบบรับสมัครงาน
+        </h1>
+        <p className="text-slate-600 mt-1">
+          จัดการตำแหน่งงานและข้อมูลการรับสมัคร
+        </p>
+      </div>
 
+      {/* Button */}
       <button
         onClick={() => setIsModalOpen(true)}
-        className="mb-6 rounded px-5 py-2 font-semibold text-white hover:opacity-90"
-        style={{ backgroundColor: '#2563EB' }}
+        className="
+          mb-6 
+          rounded-lg 
+          bg-blue-600 
+          px-6 
+          py-2.5 
+          text-white 
+          font-medium
+          shadow-md
+          hover:bg-blue-700
+          transition
+        "
       >
         + เพิ่มตำแหน่งงาน
       </button>
 
-      <JobGrid jobs={jobs} />
+      {/* Job list */}
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <JobGrid jobs={jobs} />
+      </div>
 
+      {/* Modal */}
       <CreateJobModal
         isOpen={isModalOpen}
         jobTitle={jobTitle}
-        department={departmentId === "" ? "" : String(departmentId)}
+        department={departmentId}
         jobLevel={jobLevel}
         location={location}
         description={description}
@@ -119,7 +136,7 @@ export default function Page() {
         closeDate={closeDate}
         departments={departments}
         onChangeTitle={setJobTitle}
-        onChangeDepartment={(v) => setDepartmentId(v === "" ? "" : Number(v))}
+        onChangeDepartment={setDepartmentId}
         onChangeLevel={setJobLevel}
         onChangeLocation={setLocation}
         onChangeDescription={setDescription}
