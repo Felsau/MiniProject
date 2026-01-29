@@ -1,45 +1,159 @@
-import { getServerSession } from "next-auth";
-import Link from "next/link";
-import LogoutButton from "@/components/LogoutButton";
+"use client";
 
-export default async function Home() {
-  const session = await getServerSession();
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Building2, Lock, User, ArrowRight } from "lucide-react";
+
+export default function Home() {
+  const router = useRouter();
+  const [data, setData] = useState({ username: "", password: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await signIn("credentials", {
+        username: data.username,
+        password: data.password,
+        redirect: false,
+      });
+
+      if (res?.error) {
+        setError("ชื่อผู้ใช้ หรือ รหัสผ่านไม่ถูกต้อง");
+        setLoading(false);
+      } else {
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch (err) {
+      setError("เกิดข้อผิดพลาด กรุณาลองใหม่");
+      setLoading(false);
+    }
+  };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gray-50">
-      <div className="z-10 w-full max-w-2xl items-center justify-between font-mono text-sm flex flex-col gap-8 bg-white p-10 rounded-2xl shadow-xl">
-        <h1 className="text-4xl font-bold text-gray-900">
-          Project Website
-        </h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-4 relative overflow-hidden">
+      
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
+      </div>
 
-        {session ? (
-          // ถ้า Login แล้วจะเห็นส่วนนี้
-          <div className="flex flex-col items-center gap-4">
-            <p className="text-xl text-green-600 font-medium">
-              สถานะ: เข้าสู่ระบบแล้ว ✅
+      <div className="relative w-full max-w-md">
+        {/* Logo & Branding */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-2xl mb-6 transform hover:scale-105 transition-transform">
+            <Building2 size={40} className="text-blue-600" />
+          </div>
+          <h1 className="text-4xl font-bold text-white mb-2">
+            Internal Job Portal
+          </h1>
+          <p className="text-blue-100 text-lg">ระบบจัดหางานภายในองค์กร</p>
+        </div>
+
+        {/* Login Card */}
+        <div className="bg-white/95 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-white/20">
+          
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">เข้าสู่ระบบ</h2>
+            <p className="text-gray-500 text-sm mt-1">กรุณาเข้าสู่ระบบเพื่อดำเนินการต่อ</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            
+            {error && (
+              <div className="bg-red-50 text-red-600 text-sm p-4 rounded-xl border border-red-100 flex items-center gap-2">
+                <span className="text-lg">⚠️</span>
+                {error}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">
+                ชื่อผู้ใช้ (Username)
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input 
+                  type="text" 
+                  required
+                  className="w-full border-2 border-gray-200 rounded-xl pl-11 pr-4 py-3.5 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition text-gray-900 font-medium"
+                  placeholder="admin / hr / john.dev"
+                  onChange={(e) => setData({ ...data, username: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">
+                รหัสผ่าน (Password)
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input 
+                  type="password" 
+                  required
+                  className="w-full border-2 border-gray-200 rounded-xl pl-11 pr-4 py-3.5 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition text-gray-900 font-medium"
+                  placeholder="••••••••"
+                  onChange={(e) => setData({ ...data, password: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 group"
+            >
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  กำลังตรวจสอบ...
+                </>
+              ) : (
+                <>
+                  เข้าสู่ระบบ
+                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Test Credentials */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <p className="text-center text-sm text-gray-600 mb-3">
+              🔑 ข้อมูลทดสอบ (Test Accounts)
             </p>
-            <p className="text-gray-700 text-lg">
-              ยินดีต้อนรับคุณ <span className="font-bold">{session.user?.name}</span>
-            </p>
-            <div className="flex gap-4 mt-4">
-              <Link href="/dashboard" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
-                ไปที่ Dashboard
-              </Link>
-              <LogoutButton />
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Admin:</span>
+                <span className="font-mono font-bold text-gray-800">admin / 123456</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">HR:</span>
+                <span className="font-mono font-bold text-gray-800">hr / 123456</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">User:</span>
+                <span className="font-mono font-bold text-gray-800">john.dev / 123456</span>
+              </div>
             </div>
           </div>
-        ) : (
-          // ถ้ายังไม่ได้ Login จะเห็นส่วนนี้
-          <div className="flex flex-col items-center gap-4">
-            <p className="text-xl text-red-500 font-medium">
-              สถานะ: ยังไม่ได้เข้าสู่ระบบ ❌
-            </p>
-            <Link href="/login" className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition">
-              เข้าสู่ระบบที่นี่
-            </Link>
-          </div>
-        )}
+
+        </div>
+
+        {/* Footer */}
+        <p className="text-center text-white/70 text-sm mt-6">
+          © 2026 Internal Job Portal. All rights reserved.
+        </p>
       </div>
-    </main>
+    </div>
   );
 }

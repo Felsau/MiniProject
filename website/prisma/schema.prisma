@@ -1,4 +1,6 @@
-// prisma/schema.prisma
+// ============================================
+// Prisma Schema - Job Recruitment System
+// ============================================
 
 generator client {
   provider = "prisma-client-js"
@@ -6,39 +8,58 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./Database.db"
 }
+
+// ============================================
+// User Management (ระบบผู้ใช้งาน)
+// ============================================
 
 model User {
   id        Int      @id @default(autoincrement())
   username  String   @unique
-  password  String
+  password  String   // Hashed password
   role      String   @default("USER") // ADMIN, HR, USER
   
-  // 👇 เพิ่มข้อมูลส่วนตัว (ใส่ ? แปลว่า "มีหรือไม่มีก็ได้" จะได้ไม่ error กับ user เก่า)
+  // Personal Information
   fullName  String?  // ชื่อ-นามสกุลจริง
   email     String?  // อีเมลติดต่อ
   phone     String?  // เบอร์โทร
-  position  String?  // ตำแหน่งงานปัจจุบัน (เช่น Senior Developer)
-  bio       String?  // แนะนำตัวสั้นๆ
+  position  String?  // ตำแหน่งงานปัจจุบัน
+  bio       String?  // แนะนำตัว
   
+  // Timestamps
   createdAt DateTime @default(now())
-  jobs      Job[]
+  
+  // Relations
+  jobs      Job[]    // งานที่สร้าง
+
+  @@map("User")
 }
 
+// ============================================
+// Job Posting (ระบบประกาศงาน)
+// ============================================
 
-// ตารางใหม่ที่เราต้องเพิ่ม
 model Job {
-  id          Int      @id @default(autoincrement())
-  title       String   // ชื่อตำแหน่ง (เช่น Frontend Developer)
-  department  String   // แผนก (เช่น IT)
-  location    String   // สถานที่ทำงาน
-  salary      String?  // เงินเดือน (ใส่ ? แปลว่าไม่ระบุก็ได้)
-  description String   // รายละเอียด
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String   @id @default(cuid())
+  title            String
+  description      String?
+  department       String?
+  location         String?
+  salary           String?
+  employmentType   String   @default("FULL_TIME")
+  requirements     String?
+  responsibilities String?
+  benefits         String?
 
-  // เชื่อมกับคนโพสต์
-  author      User     @relation(fields: [authorId], references: [id])
-  authorId    Int
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  postedByUser User @relation(fields: [postedBy], references: [id], onDelete: Cascade)
+  postedBy     Int
+
+  @@map("Job")
 }

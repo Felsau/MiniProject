@@ -1,6 +1,0 @@
--- AlterTable
-ALTER TABLE "User" ADD COLUMN "bio" TEXT;
-ALTER TABLE "User" ADD COLUMN "email" TEXT;
-ALTER TABLE "User" ADD COLUMN "fullName" TEXT;
-ALTER TABLE "User" ADD COLUMN "phone" TEXT;
-ALTER TABLE "User" ADD COLUMN "position" TEXT;
