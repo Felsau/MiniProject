@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { MapPin, Briefcase, Trash2, Edit2, DollarSign } from "lucide-react";
-import EditJobModal from "./EditJobModal";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Job {
   id: string;
@@ -30,8 +30,6 @@ interface JobListProps {
 
 export default function JobList({ jobs, userRole }: JobListProps) {
   const router = useRouter();
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const handleDelete = async (jobId: string) => {
     if (!confirm("คุณแน่ใจหรือไม่ที่จะลบงานนี้?")) return;
@@ -51,9 +49,8 @@ export default function JobList({ jobs, userRole }: JobListProps) {
     }
   };
 
-  const handleEdit = (job: Job) => {
-    setSelectedJob(job);
-    setIsEditModalOpen(true);
+  const handleEdit = (jobId: string) => {
+    router.push(`/recruitment/${jobId}/edit`);
   };
 
   const getEmploymentTypeLabel = (type: string) => {
@@ -134,7 +131,7 @@ export default function JobList({ jobs, userRole }: JobListProps) {
               {(userRole === "HR" || userRole === "ADMIN") && (
                 <div className="flex items-center gap-2 ml-4">
                   <button
-                    onClick={() => handleEdit(job)}
+                    onClick={() => handleEdit(job.id)}
                     className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                     title="แก้ไข"
                   >
@@ -153,17 +150,6 @@ export default function JobList({ jobs, userRole }: JobListProps) {
           </div>
         ))}
       </div>
-
-      {selectedJob && (
-        <EditJobModal
-          job={selectedJob}
-          isOpen={isEditModalOpen}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setSelectedJob(null);
-          }}
-        />
-      )}
     </>
   );
 }
