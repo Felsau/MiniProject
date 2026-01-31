@@ -3,6 +3,50 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 
+// ============================================
+// GET all active jobs (or all jobs if admin)
+// ============================================
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const includeInactive = searchParams.get("includeInactive") === "true";
+    const session = await getServerSession(authOptions);
+
+    // Determine if user is admin/hr
+    let isAdminOrHR = false;
+    if (session?.user?.name) {
+      const user = await prisma.user.findUnique({
+        where: { username: session.user.name as string },
+      });
+      isAdminOrHR = user?.role === "ADMIN" || user?.role === "HR";
+    }
+
+    // Admin/HR can see all jobs, others see only active jobs
+    const jobs = await prisma.job.findMany({
+      where: includeInactive && isAdminOrHR ? {} : { isActive: true },
+      include: {
+        postedByUser: {
+          select: {
+            fullName: true,
+            username: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return NextResponse.json(jobs, { status: 200 });
+  } catch (error) {
+    console.error("Error fetching jobs:", error);
+    return NextResponse.json(
+      { error: "เกิดข้อผิดพลาดในการดึงข้อมูล" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(req: Request) {
   try {
     // 1. เช็คว่า Login หรือยัง?

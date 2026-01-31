@@ -52,10 +52,12 @@ model Job {
   requirements     String?
   responsibilities String?
   benefits         String?
+  isActive         Boolean  @default(true) // Kill section - soft delete flag
 
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  killedAt  DateTime? // Timestamp when job was killed
 
   // Relations
   postedByUser User @relation(fields: [postedBy], references: [id], onDelete: Cascade)

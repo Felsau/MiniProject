@@ -218,6 +218,76 @@ npm run db:generate
 - Always create migrations for schema changes
 - Test seeds before committing
 
+## Kill Section (Soft Delete Feature)
+
+### Overview
+The Kill Section system allows HR and Admin users to temporarily deactivate job postings without permanently deleting them. This is useful for managing job posting lifecycle and maintaining historical records.
+
+### Database Schema Changes
+```prisma
+model Job {
+  // ... existing fields ...
+  isActive         Boolean  @default(true)   // Status: active or inactive
+  killedAt         DateTime?                 // Timestamp when job was deactivated
+}
+```
+
+### Features
+
+#### 1. Kill Job (Deactivate)
+- HR/Admin users can deactivate active job postings
+- Job is hidden from public view but data is preserved
+- `killedAt` timestamp records when the job was deactivated
+- Kill action is reversible via the Restore feature
+
+#### 2. Restore Job (Reactivate)
+- Deactivated jobs can be restored to active status
+- `killedAt` is set back to null
+- Job becomes visible again to all users
+
+#### 3. UI Indicators
+- Killed jobs display with a yellow badge "ปิดแล้ว" (Closed)
+- Killed job cards have yellow background styling
+- Kill/Restore buttons appear in the action bar
+
+### API Endpoints
+
+#### Kill Job
+```http
+PATCH /api/job/:id
+Content-Type: application/json
+
+{
+  "action": "kill"
+}
+```
+
+#### Restore Job
+```http
+PATCH /api/job/:id
+Content-Type: application/json
+
+{
+  "action": "restore"
+}
+```
+
+### Server Actions
+Located in `src/actions/jobActions.ts`:
+- `killJobAction(jobId: string)` - Deactivate a job
+- `restoreJobAction(jobId: string)` - Reactivate a job
+- `getInactiveJobsAction()` - Fetch deactivated jobs
+
+### Permission Rules
+- **Author**: Can kill/restore their own jobs
+- **HR**: Can kill/restore any job
+- **Admin**: Can kill/restore any job
+- **Regular User**: Cannot perform kill/restore actions
+
+### Job Visibility
+- **Regular Users**: See only active jobs (isActive = true)
+- **HR/Admin with includeInactive=true**: See all jobs including killed ones
+
 ## Security Notes
 
 🔒 **Never Commit:**

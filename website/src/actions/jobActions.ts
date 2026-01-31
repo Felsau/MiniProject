@@ -82,3 +82,62 @@ export async function getDepartmentsAction() {
   }
 }
 
+// ============================================
+// Kill Section - Job Soft Delete Actions
+// ============================================
+
+export async function killJobAction(jobId: string) {
+  try {
+    const updatedJob = await prisma.job.update({
+      where: { id: jobId },
+      data: {
+        isActive: false,
+        killedAt: new Date(),
+      },
+    });
+
+    revalidatePath("/");
+    return { success: true, job: updatedJob };
+  } catch (error) {
+    console.error("Kill Job Error:", error);
+    return { success: false, error: "ไม่สามารถปิดประกาศงานได้" };
+  }
+}
+
+export async function restoreJobAction(jobId: string) {
+  try {
+    const updatedJob = await prisma.job.update({
+      where: { id: jobId },
+      data: {
+        isActive: true,
+        killedAt: null,
+      },
+    });
+
+    revalidatePath("/");
+    return { success: true, job: updatedJob };
+  } catch (error) {
+    console.error("Restore Job Error:", error);
+    return { success: false, error: "ไม่สามารถเปิดประกาศงานได้" };
+  }
+}
+
+export async function getInactiveJobsAction() {
+  try {
+    return await prisma.job.findMany({
+      where: {
+        isActive: false,
+      },
+      include: {
+        postedByUser: true,
+      },
+      orderBy: {
+        killedAt: "desc",
+      },
+    });
+  } catch (error) {
+    console.error("Fetch Inactive Jobs Error:", error);
+    return [];
+  }
+}
+

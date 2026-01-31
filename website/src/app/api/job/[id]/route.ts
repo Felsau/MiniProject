@@ -58,6 +58,95 @@ export async function PUT(
   }
 }
 
+// ============================================
+// Kill Section - Soft Delete Job Posting
+// ============================================
+export async function PATCH(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json(
+        { error: "กรุณาเข้าสู่ระบบก่อน" },
+        { status: 401 }
+      );
+    }
+
+    const body = await req.json();
+    const { action } = body;
+
+    // Validate action
+    if (!action || !["kill", "restore"].includes(action)) {
+      return NextResponse.json(
+        { error: "Invalid action. Use 'kill' or 'restore'" },
+        { status: 400 }
+      );
+    }
+
+    const job = await prisma.job.findUnique({
+      where: { id: params.id },
+      include: { postedByUser: true },
+    });
+
+    if (!job) {
+      return NextResponse.json(
+        { error: "ไม่พบประกาศงาน" },
+        { status: 404 }
+      );
+    }
+
+    // Check authorization - only author, HR, or ADMIN can kill jobs
+    const user = await prisma.user.findUnique({
+      where: { username: session.user?.name as string },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "ไม่พบข้อมูลผู้ใช้" },
+        { status: 404 }
+      );
+    }
+
+    const isAuthor = job.postedBy === user.id;
+    const isAuthorized = isAuthor || user.role === "HR" || user.role === "ADMIN";
+
+    if (!isAuthorized) {
+      return NextResponse.json(
+        { error: "คุณไม่มีสิทธิ์แก้ไขประกาศงานนี้" },
+        { status: 403 }
+      );
+    }
+
+    // Perform the action
+    const updatedJob = await prisma.job.update({
+      where: { id: params.id },
+      data: {
+        isActive: action === "kill" ? false : true,
+        killedAt: action === "kill" ? new Date() : null,
+      },
+      include: { postedByUser: true },
+    });
+
+    const message = action === "kill" 
+      ? "ปิดประกาศงานสำเร็จ" 
+      : "เปิดประกาศงานสำเร็จ";
+
+    return NextResponse.json(
+      { message, job: updatedJob },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error updating job status:", error);
+    return NextResponse.json(
+      { error: "เกิดข้อผิดพลาดในการเปลี่ยนสถานะ" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
@@ -85,3 +174,4 @@ export async function DELETE(
     );
   }
 }
+

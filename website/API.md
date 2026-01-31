@@ -118,6 +118,50 @@ Response: 200 OK
 }
 ```
 
+#### Kill Job (Soft Delete - Authenticated, Author/HR/Admin Only)
+```
+PATCH /api/job/:id
+Content-Type: application/json
+Authorization: Required (session)
+
+{
+  "action": "kill"
+}
+
+Response: 200 OK
+{
+  "message": "ปิดประกาศงานสำเร็จ",
+  "job": {
+    "id": 1,
+    "title": "Senior React Developer",
+    "isActive": false,
+    "killedAt": "2026-01-31T12:00:00Z"
+  }
+}
+```
+
+#### Restore Job (Reactivate - Authenticated, Author/HR/Admin Only)
+```
+PATCH /api/job/:id
+Content-Type: application/json
+Authorization: Required (session)
+
+{
+  "action": "restore"
+}
+
+Response: 200 OK
+{
+  "message": "เปิดประกาศงานสำเร็จ",
+  "job": {
+    "id": 1,
+    "title": "Senior React Developer",
+    "isActive": true,
+    "killedAt": null
+  }
+}
+```
+
 #### Get Single Job
 ```
 GET /api/job/:id
