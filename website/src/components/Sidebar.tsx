@@ -36,7 +36,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="w-72 min-h-screen bg-white shadow-2xl flex flex-col relative">
+    <div className="fixed left-0 top-0 w-72 h-screen bg-white shadow-2xl flex flex-col overflow-y-auto z-40">
       {/* Decorative Background */}
       <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 opacity-10"></div>
       

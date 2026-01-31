@@ -1,58 +1,32 @@
-# 🚀 Job Recruitment System
-
-A modern job recruitment platform built with Next.js 16, Prisma, and NextAuth. This system allows users to browse job postings, and authenticated users can create and manage job listings.
-
-## ✨ Features
-
-- 🔐 **Authentication System**: Secure login with NextAuth and bcrypt password hashing
-- 👥 **Role-Based Access**: Admin, HR, and User roles with different permissions
-- 💼 **Job Management**: Create, view, update, and delete job postings
-- 📊 **User Profiles**: Complete profile management with personal information
-- 🎨 **Modern UI**: Clean and responsive design with Tailwind CSS
-- 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices
-
-## 🛠️ Tech Stack
-
-- **Framework**: Next.js 16 (App Router)
-- **Language**: TypeScript
-- **Database**: SQLite with Prisma ORM
-- **Authentication**: NextAuth.js
-- **Styling**: Tailwind CSS
-- **Password Hashing**: bcrypt
-
-## 📋 Prerequisites
-
-- Node.js 18+ installed
-- npm or yarn package manager
-
-## 🚀 Getting Started
-
 ### 1. Install Dependencies
 
 ```bash
 npm install
 ```
 
+This will install all production and development dependencies including:
+- Next.js, React, TypeScript
+- Tailwind CSS, PostCSS
+- Prisma ORM, NextAuth.js
+- Lucide React icons, bcrypt
+- ESLint, Babel plugins, and type definitions
+
 ### 2. Setup Environment Variables
 
 ```bash
-# Copy the example env file
+
 cp .env.example .env
 
-# Edit .env and set your values
-# Important: Generate a secure NEXTAUTH_SECRET
+
 ```
 
 ### 3. Setup Database
 
 ```bash
-# Generate Prisma Client
 npx prisma generate
 
-# Run migrations
 npx prisma migrate dev
 
-# Seed the database with sample data
 npx ts-node prisma/seed.ts
 ```
 
@@ -75,9 +49,7 @@ After seeding the database, you can login with these accounts (password: `123456
 | `john.dev` | `123456` | USER | Regular user |
 | `jane.design` | `123456` | USER | Regular user |
 
-## 📁 Project Structure
 
-```
 website/
 ├── prisma/              # Database schema and migrations
 │   ├── schema.prisma    # Prisma schema definition
@@ -93,66 +65,69 @@ website/
 │   ├── lib/             # Utility functions
 │   └── types/           # TypeScript type definitions
 └── public/              # Static assets
-```
 
-## 🔧 Available Scripts
 
 ```bash
 # Development
 npm run dev              # Start development server
 
-# Build
+# Build & Production
 npm run build            # Build for production
 npm start                # Start production server
 
-# Database
-npx prisma studio        # Open Prisma Studio (Database GUI)
-npx prisma migrate dev   # Create and apply migrations
-npx ts-node prisma/seed.ts  # Seed database
+# Database Management
+npm run db:generate      # Generate Prisma client
+npm run db:migrate       # Create and apply migrations
+npm run db:seed          # Seed database with initial data
+npm run db:studio        # Open Prisma Studio (Database GUI)
+npm run db:reset         # Reset database and re-seed
 
 # Code Quality
 npm run lint             # Run ESLint
-```
 
-## 📝 Database Schema
 
-### User Model
-- Authentication (username, password)
-- Role management (ADMIN, HR, USER)
-- Profile information (fullName, email, phone, position, bio)
-- Relations to Job postings
+Create a .env
 
-### Job Model
-- Job details (title, department, location, salary, description)
-- Timestamps (createdAt, updatedAt)
-- Author relationship
-
-## 🔐 Environment Variables
-
-Create a `.env` file in the root directory:
-
-```env
+env
 DATABASE_URL="file:./prisma/Database.db"
 NEXTAUTH_SECRET="your-secret-key-here"
 NEXTAUTH_URL="http://localhost:3000"
 NODE_ENV="development"
 ```
 
-## 📚 Learn More
+## 📦 Installed npm Packages
 
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Prisma Documentation](https://www.prisma.io/docs)
-- [NextAuth.js Documentation](https://next-auth.js.org)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+### Production Dependencies
+| Package | Version | Purpose |
+|---------|---------|---------|
+| @prisma/client | 5.19.0 | Database ORM client |
+| bcrypt | ^6.0.0 | Password hashing for authentication |
+| lucide-react | ^0.563.0 | Icon library (ArrowLeft, Save, Edit, etc.) |
+| next | 16.1.4 | React framework with App Router |
+| next-auth | ^4.24.13 | Authentication & session management |
+| openai | ^6.16.0 | OpenAI API integration |
+| prisma | 5.19.0 | Database ORM |
+| react | 19.2.3 | UI library |
+| react-dom | 19.2.3 | React DOM |
 
-## 🤝 Contributing
+### Development Dependencies
+| Package | Version | Purpose |
+|---------|---------|---------|
+| @prisma/client | ^5.22.0 | Prisma type definitions |
+| @tailwindcss/postcss | ^4 | Tailwind CSS PostCSS plugin |
+| @types/bcrypt | ^6.0.0 | TypeScript types for bcrypt |
+| @types/node | ^20 | Node.js TypeScript types |
+| @types/react | ^19 | React TypeScript types |
+| @types/react-dom | ^19 | React DOM TypeScript types |
+| babel-plugin-react-compiler | 1.0.0 | React compiler plugin |
+| eslint | ^9 | Code linter |
+| eslint-config-next | 16.1.4 | ESLint configuration for Next.js |
+| prisma | ^5.22.0 | Prisma CLI |
+| tailwindcss | ^4 | CSS utility framework |
+| typescript | ^5 | TypeScript language |
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📄 License
-
-This project is open source and available under the MIT License.
-
-## 👨‍💻 Author
-
-Created with ❤️ by the Development Team
+### To Install Additional Packages
+```bash
+npm install <package-name>                   
+npm install <package-name> --save-dev         
+```

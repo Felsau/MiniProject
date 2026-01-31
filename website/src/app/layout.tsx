@@ -44,12 +44,12 @@ export default async function RootLayout({
       >
         <SessionProvider session={session}>
           {showSidebar ? (
-            <div className="flex min-h-screen">
+            <>
               <Sidebar />
-              <main className="flex-1 overflow-auto">
-                <div className="min-h-screen">{children}</div>
+              <main className="ml-72 min-h-screen">
+                {children}
               </main>
-            </div>
+            </>
           ) : (
             children
           )}
