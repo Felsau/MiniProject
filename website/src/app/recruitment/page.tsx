@@ -4,10 +4,10 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import JobList from "@/components/recruitment/JobList";
 import AddJobModal from "@/components/recruitment/AddJobModal";
-import Pagination from "@/components/ui/Pagination";
+import Pagination from "@/components/ui/Pagination"; // 1. อย่าลืม Import Pagination
 import { Briefcase, Users, Filter, TrendingUp } from "lucide-react";
 
-// 1. ปรับ Type ของ Props ให้รองรับ Promise (Next.js 15 standard)
+// 2. กำหนด Type ให้รองรับ Next.js 15
 type Props = {
   searchParams: Promise<{ page?: string }>;
 };
@@ -21,17 +21,15 @@ export default async function RecruitmentPage(props: Props) {
 
   const userRole = (session.user as { role?: string })?.role;
 
-  // 2. Await searchParams เพื่อดึงค่า page ออกมา
+  // 3. รอรับค่า Page จาก URL
   const searchParams = await props.searchParams;
   const currentPage = Number(searchParams?.page) || 1;
-  
-  // เพื่อความชัวร์ ลอง log ดูค่าใน Terminal ว่าเปลี่ยนเลขไหมตอนกดเปลี่ยนหน้า
-  console.log("Current Page:", currentPage); 
-
-  const itemsPerPage = 6;
+  const itemsPerPage = 6; // จำนวนงานต่อ 1 หน้า
   const skip = (currentPage - 1) * itemsPerPage;
 
+  // 4. ใช้ Promise.all ดึงข้อมูลพร้อมกัน (Jobs สำหรับ List และ Count สำหรับ Stats)
   const [jobs, totalJobCount, fullTimeCount, partTimeCount, contractCount] = await Promise.all([
+    // Query 1: ดึงรายการงาน (เฉพาะหน้านี้)
     prisma.job.findMany({
       take: itemsPerPage,
       skip: skip,
@@ -43,12 +41,13 @@ export default async function RecruitmentPage(props: Props) {
           },
         },
       },
-      // แนะนำให้เรียง 2 ชั้นเพื่อป้องกันข้อมูลสลับที่ถ้าเวลาเท่ากัน
+      // เรียงลำดับ 2 ชั้น เพื่อกันข้อมูลซ้ำระหว่างหน้า
       orderBy: [
         { createdAt: "desc" },
         { id: "desc" }
       ],
     }),
+    // Query 2-5: นับจำนวนงานประเภทต่างๆ (เพื่อให้ Stats Card แสดงผลถูกต้อง)
     prisma.job.count(),
     prisma.job.count({ where: { employmentType: "FULL_TIME" } }),
     prisma.job.count({ where: { employmentType: "PART_TIME" } }),
@@ -59,26 +58,28 @@ export default async function RecruitmentPage(props: Props) {
 
   return (
     <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* ... ส่วน Header และ Stats (เหมือนเดิม ไม่ต้องแก้) ... */}
+      {/* Header */}
       <div className="mb-8">
-         {/* ... (Code เดิม) ... */}
-         <div className="flex items-center justify-between mb-4">
-           <div>
-             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
-               ระบบจัดหางาน
-             </h1>
-             <p className="text-gray-600 text-lg">จัดการตำแหน่งงานและรับสมัครพนักงานใหม่</p>
-           </div>
-           {(userRole === "HR" || userRole === "ADMIN") && (
-             <AddJobModal />
-           )}
-         </div>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+              ระบบจัดหางาน
+            </h1>
+            <p className="text-gray-600 text-lg">จัดการตำแหน่งงานและรับสมัครพนักงานใหม่</p>
+          </div>
+          {(userRole === "HR" || userRole === "ADMIN") && (
+            <AddJobModal />
+          )}
+        </div>
       </div>
 
-       {/* Statistics Cards */}
+      {/* Statistics Cards */}
+      {/* แก้ไข: เปลี่ยนไปใช้ตัวแปร Count ที่นับจาก DB แทน jobs.length */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        
+        {/* Card 1: งานทั้งหมด */}
         <div className="card-hover bg-white rounded-2xl shadow-lg p-6 border border-gray-100 relative overflow-hidden">
-          {/* ... (ส่วนตกแต่ง) ... */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-full -mr-16 -mt-16"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-3">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -93,17 +94,66 @@ export default async function RecruitmentPage(props: Props) {
             <p className="text-3xl font-bold text-gray-900">{totalJobCount}</p>
           </div>
         </div>
-        {/* ... (Cards อื่นๆ ใส่เหมือนเดิมได้เลยครับ โดยใช้ตัวแปร fullTimeCount, partTimeCount ฯลฯ) ... */}
-         <div className="card-hover bg-white rounded-2xl shadow-lg p-6 border border-gray-100 relative overflow-hidden">
-            <div className="relative z-10">
-                <p className="text-sm font-semibold text-gray-500 mb-1 uppercase tracking-wide">Full-time</p>
-                <p className="text-3xl font-bold text-blue-600">{fullTimeCount}</p>
+
+        {/* Card 2: Full-time */}
+        <div className="card-hover bg-white rounded-2xl shadow-lg p-6 border border-gray-100 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-full -mr-16 -mt-16"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Users size={24} className="text-white" />
+              </div>
+              <div className="text-xs font-semibold text-blue-600">
+                {totalJobCount > 0 ? Math.round((fullTimeCount / totalJobCount) * 100) : 0}%
+              </div>
             </div>
-         </div>
-         {/* ... (ละไว้ในฐานที่เข้าใจ ใส่ให้ครบเหมือนเดิม) ... */}
+            <p className="text-sm font-semibold text-gray-500 mb-1 uppercase tracking-wide">Full-time</p>
+            <p className="text-3xl font-bold text-blue-600">
+              {fullTimeCount}
+            </p>
+          </div>
+        </div>
+
+        {/* Card 3: Part-time */}
+        <div className="card-hover bg-white rounded-2xl shadow-lg p-6 border border-gray-100 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-full -mr-16 -mt-16"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Users size={24} className="text-white" />
+              </div>
+              <div className="text-xs font-semibold text-green-600">
+                {totalJobCount > 0 ? Math.round((partTimeCount / totalJobCount) * 100) : 0}%
+              </div>
+            </div>
+            <p className="text-sm font-semibold text-gray-500 mb-1 uppercase tracking-wide">Part-time</p>
+            <p className="text-3xl font-bold text-green-600">
+              {partTimeCount}
+            </p>
+          </div>
+        </div>
+
+        {/* Card 4: Contract */}
+        <div className="card-hover bg-white rounded-2xl shadow-lg p-6 border border-gray-100 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full -mr-16 -mt-16"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Users size={24} className="text-white" />
+              </div>
+              <div className="text-xs font-semibold text-purple-600">
+                {totalJobCount > 0 ? Math.round((contractCount / totalJobCount) * 100) : 0}%
+              </div>
+            </div>
+            <p className="text-sm font-semibold text-gray-500 mb-1 uppercase tracking-wide">Contract</p>
+            <p className="text-3xl font-bold text-purple-600">
+              {contractCount}
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Job List */}
+      {/* Job List Section */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
         <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-blue-50">
           <div className="flex items-center justify-between">
@@ -117,9 +167,12 @@ export default async function RecruitmentPage(props: Props) {
             </button>
           </div>
         </div>
+        
         <div className="p-6">
+          {/* List แสดงงาน (เฉพาะหน้าปัจจุบัน) */}
           <JobList jobs={jobs} userRole={userRole} />
           
+          {/* Pagination Component */}
           <div className="mt-8 pt-6 border-t border-gray-100">
              <Pagination totalPages={totalPages} />
           </div>
