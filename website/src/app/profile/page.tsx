@@ -11,16 +11,20 @@ export default async function ProfilePage() {
 
   const user = await prisma.user.findUnique({
     where: { username: session.user?.name as string },
-    include: { jobs: { orderBy: { createdAt: 'desc' } } }
+    include: {
+      jobs: { orderBy: { createdAt: 'desc' } },
+      applications: { include: { job: true }, orderBy: { createdAt: 'desc' } },
+    }
   })
 
   if (!user) return <div>ไม่พบข้อมูล</div>
 
   // เช็คว่า "เป็นคนลงประกาศงานได้ไหม?"
   const isRecruiter = user.role === 'ADMIN' || user.role === 'HR';
+  const activeJobsCount = user.jobs.filter(job => job.isActive).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 md:p-12">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 md:p-12">
       
       {/* Header */}
       <div className="max-w-6xl mx-auto mb-8">
@@ -37,13 +41,13 @@ export default async function ProfilePage() {
           {/* Card 1: รูปและข้อมูลติดต่อ */}
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden card-hover">
             {/* Header Gradient */}
-            <div className="h-32 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 relative">
+            <div className="h-32 bg-linear-to-br from-blue-600 via-indigo-600 to-purple-600 relative">
               <div className="absolute inset-0 bg-black/10"></div>
             </div>
             
             {/* Profile Section */}
             <div className="px-6 pb-6 -mt-16 relative z-10">
-              <div className="w-28 h-28 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mb-4 border-4 border-white shadow-xl mx-auto">
+              <div className="w-28 h-28 bg-linear-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mb-4 border-4 border-white shadow-xl mx-auto">
                 <User size={48} className="text-white" />
               </div>
               
@@ -65,7 +69,7 @@ export default async function ProfilePage() {
               </div>
 
               {/* Contact Info */}
-              <div className="space-y-3 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-4 border border-gray-100">
+              <div className="space-y-3 bg-linear-to-br from-gray-50 to-blue-50 rounded-xl p-4 border border-gray-100">
                 <div className="flex items-center gap-3 text-gray-700 text-sm">
                   <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
                     <Mail size={16} className="text-blue-600" />
@@ -104,7 +108,7 @@ export default async function ProfilePage() {
               {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="card-hover bg-white p-6 rounded-2xl border border-gray-100 shadow-lg relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-full -mr-12 -mt-12"></div>
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-linear-to-br from-blue-500/10 to-indigo-500/10 rounded-full -mr-12 -mt-12"></div>
                   <div className="relative z-10">
                     <p className="text-gray-500 text-sm font-semibold mb-2 uppercase tracking-wide">ประกาศงานทั้งหมด</p>
                     <p className="text-4xl font-bold text-blue-600 mb-1">{user.jobs.length}</p>
@@ -113,16 +117,16 @@ export default async function ProfilePage() {
                 </div>
                 
                 <div className="card-hover bg-white p-6 rounded-2xl border border-gray-100 shadow-lg relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-full -mr-12 -mt-12"></div>
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-linear-to-br from-green-500/10 to-emerald-500/10 rounded-full -mr-12 -mt-12"></div>
                   <div className="relative z-10">
                     <p className="text-gray-500 text-sm font-semibold mb-2 uppercase tracking-wide">งานที่เปิดรับ</p>
-                    <p className="text-4xl font-bold text-green-600 mb-1">{user.jobs.length}</p>
+                    <p className="text-4xl font-bold text-green-600 mb-1">{activeJobsCount}</p>
                     <p className="text-xs text-gray-400">Active</p>
                   </div>
                 </div>
                 
                 <div className="card-hover bg-white p-6 rounded-2xl border border-gray-100 shadow-lg relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full -mr-12 -mt-12"></div>
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-linear-to-br from-purple-500/10 to-pink-500/10 rounded-full -mr-12 -mt-12"></div>
                   <div className="relative z-10">
                     <p className="text-gray-500 text-sm font-semibold mb-2 uppercase tracking-wide">ผู้สมัครทั้งหมด</p>
                     <p className="text-4xl font-bold text-purple-600 mb-1">0</p>
@@ -133,7 +137,7 @@ export default async function ProfilePage() {
 
               {/* Job List */}
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-blue-50">
+                <div className="p-6 border-b border-gray-100 bg-linear-to-r from-gray-50 to-blue-50">
                   <h3 className="font-bold text-xl text-gray-800 flex items-center gap-2">
                     <Briefcase size={24} className="text-blue-600" />
                     ประวัติการลงประกาศงาน
@@ -143,7 +147,7 @@ export default async function ProfilePage() {
                 <div className="p-6">
                   {user.jobs.length === 0 ? (
                     <div className="text-center py-16">
-                      <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <div className="w-20 h-20 bg-linear-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <Briefcase size={32} className="text-gray-400" />
                       </div>
                       <p className="text-gray-400 font-medium">ยังไม่มีประวัติการลงประกาศงาน</p>
@@ -151,7 +155,7 @@ export default async function ProfilePage() {
                   ) : (
                     <div className="space-y-4">
                       {user.jobs.map((job) => (
-                        <div key={job.id} className="group card-hover flex justify-between items-start p-5 rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 hover:border-blue-300 hover:shadow-lg transition-all cursor-pointer">
+                        <div key={job.id} className="group card-hover flex justify-between items-start p-5 rounded-xl border border-gray-200 bg-linear-to-br from-white to-gray-50 hover:border-blue-300 hover:shadow-lg transition-all cursor-pointer">
                           <div className="flex-1">
                             <h4 className="font-bold text-lg text-gray-800 group-hover:text-blue-600 transition mb-2">
                               {job.title}
@@ -172,8 +176,12 @@ export default async function ProfilePage() {
                             </div>
                           </div>
                           <div className="text-right ml-4">
-                            <span className="inline-block px-3 py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs rounded-lg font-semibold shadow-md">
-                              Active
+                            <span className={`inline-block px-3 py-1 text-white text-xs rounded-lg font-semibold shadow-md ${
+                              job.isActive
+                                ? "bg-linear-to-r from-green-500 to-emerald-500"
+                                : "bg-linear-to-r from-gray-400 to-gray-500"
+                            }`}>
+                              {job.isActive ? "Active" : "Inactive"}
                             </span>
                           </div>
                         </div>
@@ -187,26 +195,56 @@ export default async function ProfilePage() {
             // กรณี USER ทั่วไป
             <>
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-blue-50">
+                <div className="p-6 border-b border-gray-100 bg-linear-to-r from-gray-50 to-blue-50">
                   <h3 className="font-bold text-xl text-gray-800 flex items-center gap-2">
                     <FileText size={24} className="text-blue-600" />
-                    ประวัติการสมัครงาน
+                    ประวัติการสมัครงาน ({user.applications.length})
                   </h3>
                 </div>
                 
+                {user.applications.length === 0 ? (
                 <div className="p-12 flex flex-col items-center justify-center text-center">
-                  <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mb-6">
+                  <div className="w-24 h-24 bg-linear-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mb-6">
                     <FileText size={40} className="text-gray-400" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-800 mb-2">ยังไม่มีประวัติการสมัครงาน</h3>
                   <p className="text-gray-500 mb-6 max-w-md">
                     เริ่มต้นค้นหาตำแหน่งงานที่เหมาะสมกับคุณและส่งใบสมัครของคุณวันนี้
                   </p>
-                  <Link href="/recruitment" className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl font-semibold flex items-center gap-2">
+                  <Link href="/jobs" className="px-8 py-3 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl font-semibold flex items-center gap-2">
                     <Briefcase size={18} />
                     ค้นหางานที่น่าสนใจ
                   </Link>
                 </div>
+                ) : (
+                <div className="p-6 space-y-4">
+                  {user.applications.map((app) => (
+                    <div key={app.id} className="flex justify-between items-center p-4 rounded-xl border border-gray-200 hover:border-blue-300 transition-all">
+                      <div>
+                        <h4 className="font-bold text-gray-800">{app.job.title}</h4>
+                        <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
+                          <span className="flex items-center gap-1">
+                            <MapPin size={14} />
+                            {app.job.location || "-"}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Calendar size={14} />
+                            {new Date(app.createdAt).toLocaleDateString('th-TH')}
+                          </span>
+                        </div>
+                      </div>
+                      <span className={`px-3 py-1 text-xs font-bold rounded-full ${
+                        app.status === 'ACCEPTED' ? 'bg-green-100 text-green-700' :
+                        app.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                        'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {app.status === 'ACCEPTED' ? 'ได้รับการติดต่อ' :
+                         app.status === 'REJECTED' ? 'ไม่ผ่าน' : 'รอพิจารณา'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                )}
               </div>
             </>
           )}

@@ -1,4 +1,4 @@
-import { Home, LayoutDashboard, Briefcase, Search, FileText, Bookmark, User } from "lucide-react";
+import { LayoutDashboard, Briefcase, Search, FileText, Bookmark, User, ClipboardList } from "lucide-react";
 
 export interface MenuItem {
   name: string;
@@ -10,6 +10,12 @@ export interface MenuItem {
 export function getSidebarMenuItems(userRole: string): MenuItem[] {
   if (userRole === "USER") {
     return [
+      {
+        name: "Dashboard",
+        icon: LayoutDashboard,
+        href: "/dashboard",
+        description: "ภาพรวมของคุณ",
+      },
       {
         name: "ค้นหางาน",
         icon: Search,
@@ -29,7 +35,7 @@ export function getSidebarMenuItems(userRole: string): MenuItem[] {
         description: "งานที่บันทึกไว้",
       },
       {
-        name: "ข้อมูลส่วนตัว",
+        name: "โปรไฟล์",
         icon: User,
         href: "/profile",
         description: "จัดการโปรไฟล์",
@@ -37,7 +43,7 @@ export function getSidebarMenuItems(userRole: string): MenuItem[] {
     ];
   }
 
-  // Default admin/hr menu
+  // ADMIN / HR menu
   return [
     {
       name: "Dashboard",
@@ -52,8 +58,14 @@ export function getSidebarMenuItems(userRole: string): MenuItem[] {
       description: "ระบบสรรหา",
     },
     {
+      name: "จัดการใบสมัคร",
+      icon: ClipboardList,
+      href: "/applications",
+      description: "ตรวจสอบผู้สมัคร",
+    },
+    {
       name: "โปรไฟล์",
-      icon: Home,
+      icon: User,
       href: "/profile",
       description: "ข้อมูลส่วนตัว",
     },

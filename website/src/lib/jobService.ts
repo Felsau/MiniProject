@@ -6,26 +6,22 @@ import { JobWithCount } from "@/types"; // ⚠️ อย่าลืมสร้
  * Job creation data interface
  */
 export interface CreateJobData {
-  job_title: string;
-  department_id: number; // อาจต้องแก้เป็น string ถ้าคุณเก็บเป็น text ในอนาคต
-  job_level?: string;
-  work_location?: string;
-  job_description?: string;
+  title: string;
+  department?: string;
+  location?: string;
+  description?: string;
   responsibilities?: string;
-  qualifications?: string;
-  special_conditions?: string;
-  hiring_count?: number;
-  employment_type?: string;
-  salary_min?: number;
-  salary_max?: number;
-  close_date?: string;
+  requirements?: string;
+  benefits?: string;
+  employmentType?: string;
+  salary?: string;
 }
 
 /**
  * Validate job creation data
  */
 export async function validateJobData(data: CreateJobData): Promise<{ valid: boolean; error?: string }> {
-  if (!data.job_title) {
+  if (!data.title) {
     return { valid: false, error: "Job title is required" };
   }
   return { valid: true };

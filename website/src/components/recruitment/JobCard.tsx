@@ -96,7 +96,7 @@ export function JobCard({
       </div>
 
       {/* 4. รายละเอียด (Description) */}
-      <p className="text-gray-600 text-sm line-clamp-3 mb-4 leading-relaxed flex-grow">
+      <p className="text-gray-600 text-sm line-clamp-3 mb-4 leading-relaxed grow">
         {job.description || "ไม่มีรายละเอียด"}
       </p>
 
@@ -106,7 +106,7 @@ export function JobCard({
         {/* ชื่อคนโพสต์ */}
         <div className="flex items-center gap-1.5 overflow-hidden mr-2">
           <User size={12} className="shrink-0" />
-          <span className="truncate max-w-[100px]">
+          <span className="truncate max-w-25">
             {job.postedByUser?.fullName || job.postedByUser?.username || "Admin"}
           </span>
         </div>

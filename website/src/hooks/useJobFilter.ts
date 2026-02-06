@@ -66,14 +66,17 @@ export function useJobFilter() {
 }
 
 /**
- * Hook for fetching filtered jobs
+ * Hook for fetching filtered jobs with pagination
  */
 export function useFilteredJobs() {
   const [jobs, setJobs] = useState<JobWithCount[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
-  const fetchJobs = useCallback(async (filters: JobFilterCriteria) => {
+  const fetchJobs = useCallback(async (filters: JobFilterCriteria, page: number = 1) => {
     setLoading(true);
     setError(null);
 
@@ -88,6 +91,9 @@ export function useFilteredJobs() {
       if (filters.salaryMax !== undefined) queryParams.append("salaryMax", filters.salaryMax.toString());
       if (filters.isActive !== undefined) queryParams.append("isActive", filters.isActive.toString());
 
+      queryParams.append("page", page.toString());
+      queryParams.append("limit", "6");
+
       const response = await fetch(`/api/job?${queryParams.toString()}`);
 
       if (!response.ok) {
@@ -95,7 +101,10 @@ export function useFilteredJobs() {
       }
 
       const data = await response.json();
-      setJobs(data);
+      setJobs(data.jobs);
+      setCurrentPage(data.currentPage);
+      setTotalPages(data.totalPages);
+      setTotalCount(data.totalCount);
     } catch (err) {
       const message = err instanceof Error ? err.message : "เกิดข้อผิดพลาด";
       setError(message);
@@ -108,6 +117,9 @@ export function useFilteredJobs() {
     jobs,
     loading,
     error,
+    currentPage,
+    totalPages,
+    totalCount,
     fetchJobs,
   };
 }

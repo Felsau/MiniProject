@@ -37,7 +37,7 @@ export default async function RootLayout({
           ${geistMono.variable}
           antialiased
           min-h-screen
-          bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50
+          bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50
           text-slate-900
         `}
       >

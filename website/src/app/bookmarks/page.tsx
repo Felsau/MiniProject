@@ -1,6 +1,7 @@
 "use client";
 
 import { Bookmark } from "lucide-react";
+import Link from "next/link";
 
 export default function BookmarksPage() {
   return (
@@ -21,9 +22,9 @@ export default function BookmarksPage() {
             </div>
             <p className="text-gray-500 text-lg font-medium">ยังไม่มีงานที่บันทึกไว้</p>
             <p className="text-gray-400 text-sm mt-1">คลิกที่ปุ่มบันทึกในหน้าค้นหางานเพื่อเก็บงานที่สนใจไว้</p>
-            <button className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            <Link href="/jobs" className="mt-4 inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
               ไปค้นหางาน
-            </button>
+            </Link>
           </div>
         </div>
       </div>

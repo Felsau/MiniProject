@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 
-// GET: ดึงรายการงานที่สมัคร
+// GET: ดึงรายการงานที่สมัคร (USER ดูของตัวเอง / ADMIN-HR ดูทั้งหมด)
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -12,10 +12,15 @@ export async function GET() {
     const user = await prisma.user.findUnique({ where: { username: session.user.name } });
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
+    const isAdminOrHR = user.role === "ADMIN" || user.role === "HR";
+
     const applications = await prisma.application.findMany({
-      where: { userId: user.id },
+      where: isAdminOrHR ? {} : { userId: user.id },
       include: {
-        job: true, // ✅ ต้องมีตัวนี้ ข้อมูลถึงจะขึ้นโชว์บนการ์ดครับ
+        job: true,
+        user: {
+          select: { id: true, fullName: true, username: true, email: true, phone: true },
+        },
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -73,5 +78,42 @@ export async function POST(req: Request) {
     }
     console.error("Apply Error:", error);
     return NextResponse.json({ error: "เกิดข้อผิดพลาดในการสมัคร" }, { status: 500 });
+  }
+}
+
+// PATCH: อัปเดตสถานะใบสมัคร (ADMIN/HR เท่านั้น)
+export async function PATCH(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.name) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const user = await prisma.user.findUnique({ where: { username: session.user.name } });
+    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
+    // ตรวจสอบสิทธิ์
+    if (user.role !== "ADMIN" && user.role !== "HR") {
+      return NextResponse.json({ error: "สิทธิ์ไม่เพียงพอ" }, { status: 403 });
+    }
+
+    const { applicationId, status } = await req.json();
+
+    if (!applicationId || !status) {
+      return NextResponse.json({ error: "กรุณาระบุ applicationId และ status" }, { status: 400 });
+    }
+
+    if (!["PENDING", "ACCEPTED", "REJECTED"].includes(status)) {
+      return NextResponse.json({ error: "สถานะไม่ถูกต้อง" }, { status: 400 });
+    }
+
+    const updated = await prisma.application.update({
+      where: { id: applicationId },
+      data: { status },
+      include: { job: true, user: { select: { fullName: true, username: true } } },
+    });
+
+    return NextResponse.json({ success: true, application: updated });
+  } catch (error) {
+    console.error("Update Application Error:", error);
+    return NextResponse.json({ error: "เกิดข้อผิดพลาดในการอัปเดตสถานะ" }, { status: 500 });
   }
 }

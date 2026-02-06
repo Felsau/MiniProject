@@ -27,17 +27,11 @@ export default function Home() {
         setError("ชื่อผู้ใช้ หรือ รหัสผ่านไม่ถูกต้อง");
         setLoading(false);
       } else {
-        // ดึง session เพื่อเช็ค role
-        const sessionRes = await fetch("/api/auth/session");
-        const session = await sessionRes.json();
-        const userRole = session?.user?.role;
+        // ดึง session เพื่อเช็ค role (สามารถขยายเพิ่มเติมได้ในอนาคต)
+        await fetch("/api/auth/session");
         
-        // Redirect ตาม role
-        if (userRole === "USER") {
-          router.push("/jobs");
-        } else {
-          router.push("/dashboard");
-        }
+        // Redirect ตาม role — ทุก role ไปที่ dashboard
+        router.push("/dashboard");
         router.refresh();
       }
     } catch {
@@ -47,7 +41,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-600 via-indigo-600 to-purple-700 p-4 relative overflow-hidden">
       
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
@@ -120,7 +114,7 @@ export default function Home() {
             <button 
               type="submit" 
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 group"
+              className="w-full bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 group"
             >
               {loading ? (
                 <>
@@ -141,7 +135,7 @@ export default function Home() {
             <p className="text-center text-sm text-gray-600 mb-3">
               🔑 ข้อมูลทดสอบ (Test Accounts)
             </p>
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 space-y-2 text-xs">
+            <div className="bg-linear-to-r from-blue-50 to-indigo-50 rounded-xl p-4 space-y-2 text-xs">
               <div className="flex justify-between">
                 <span className="text-gray-600">Admin:</span>
                 <span className="font-mono font-bold text-gray-800">admin / 123456</span>

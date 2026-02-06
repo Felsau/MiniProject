@@ -6,20 +6,27 @@ import { prisma } from "@/lib/prisma";
  */
 export async function GET() {
   try {
-    // Get unique departments
-    const jobs = await prisma.job.findMany({
-      where: { isActive: true },
-      distinct: ["department"],
-      select: { department: true, location: true },
-    });
+    // Get unique departments and locations in parallel
+    const [departmentRows, locationRows] = await Promise.all([
+      prisma.job.findMany({
+        where: { isActive: true },
+        distinct: ["department"],
+        select: { department: true },
+      }),
+      prisma.job.findMany({
+        where: { isActive: true },
+        distinct: ["location"],
+        select: { location: true },
+      }),
+    ]);
 
-    const departments = Array.from(
-      new Set(jobs.map((j) => j.department).filter(Boolean))
-    ) as string[];
+    const departments = departmentRows
+      .map((j) => j.department)
+      .filter(Boolean) as string[];
 
-    const locations = Array.from(
-      new Set(jobs.map((j) => j.location).filter(Boolean))
-    ) as string[];
+    const locations = locationRows
+      .map((j) => j.location)
+      .filter(Boolean) as string[];
 
     const employmentTypes = [
       { value: "FULL_TIME", label: "เต็มเวลา" },

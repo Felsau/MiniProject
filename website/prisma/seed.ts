@@ -11,8 +11,9 @@ async function main() {
   console.log('\n🌱 Starting database seed...')
   console.log('================================\n')
 
-  // Clear existing data
+  // Clear existing data (order matters due to foreign key constraints)
   console.log('🗑️  Cleaning old data...')
+  await prisma.application.deleteMany()
   await prisma.job.deleteMany()
   await prisma.user.deleteMany()
   console.log('✅ Old data cleared\n')

@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 import { getUserAuthStatus } from "@/lib/apiHelpers";
-import { searchAndFilterJobs, type JobFilterCriteria } from "@/lib/jobService";
+import { type JobFilterCriteria } from "@/lib/jobService";
 
 /**
  * GET all active jobs (or all jobs if admin)
@@ -39,38 +39,68 @@ export async function GET(req: Request) {
       filterCriteria.isActive = undefined;
     }
 
-    // Use the filter service if any filters are provided
-    const hasFilters = Object.values(filterCriteria).some(
-      (v) => v !== undefined && v !== "" && v !== true
-    );
+    // Pagination params
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "6");
+    const skip = (page - 1) * limit;
 
-    if (hasFilters || searchParams.get("search")) {
-      const jobs = await searchAndFilterJobs(filterCriteria);
-      return NextResponse.json(jobs, { status: 200 });
+    // Build where clause
+    const where: Record<string, unknown> = {};
+
+    if (!isAdminOrHR) {
+      where.isActive = true;
     }
 
-    // Default: return active jobs or all jobs if admin
-    const jobs = await prisma.job.findMany({
-      where: isAdminOrHR ? {} : { isActive: true },
-      include: {
-        postedByUser: {
-          select: {
-            fullName: true,
-            username: true,
-          },
-        },
-        _count: {
-          select: {
-            applications: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    if (filterCriteria.searchKeyword) {
+      where.OR = [
+        { title: { contains: filterCriteria.searchKeyword } },
+        { description: { contains: filterCriteria.searchKeyword } },
+        { requirements: { contains: filterCriteria.searchKeyword } },
+      ];
+    }
+    if (filterCriteria.department) where.department = { contains: filterCriteria.department };
+    if (filterCriteria.location) where.location = { contains: filterCriteria.location };
+    if (filterCriteria.employmentType) where.employmentType = filterCriteria.employmentType;
+    if (filterCriteria.isActive !== undefined && isAdminOrHR) {
+      if (searchParams.get("includeInactive") === "true") {
+        delete where.isActive;
+      } else {
+        where.isActive = filterCriteria.isActive;
+      }
+    }
 
-    return NextResponse.json(jobs, { status: 200 });
+    const includeRelations = {
+      postedByUser: {
+        select: {
+          fullName: true,
+          username: true,
+        },
+      },
+      _count: {
+        select: {
+          applications: true,
+        },
+      },
+    };
+
+    // ดึงข้อมูล + นับจำนวนทั้งหมดพร้อมกัน
+    const [jobs, totalCount] = await Promise.all([
+      prisma.job.findMany({
+        where,
+        include: includeRelations,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.job.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return NextResponse.json(
+      { jobs, totalCount, totalPages, currentPage: page },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error fetching jobs:", error);
     return NextResponse.json(
