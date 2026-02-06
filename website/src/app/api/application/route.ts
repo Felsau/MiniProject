@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
+import {
+  sendApplicationConfirmationEmail,
+  sendNewApplicationNotifyHR,
+  sendApplicationStatusUpdateEmail,
+} from "@/lib/email";
 
 // GET: ดึงรายการงานที่สมัคร (USER ดูของตัวเอง / ADMIN-HR ดูทั้งหมด)
 export async function GET() {
@@ -61,13 +66,50 @@ export async function POST(req: Request) {
     }
 
     // 3. บันทึกข้อมูล
-    await prisma.application.create({
+    const application = await prisma.application.create({
       data: {
         jobId: jobId,
         userId: user.id,
-        status: "PENDING", // กำหนดสถานะเริ่มต้นให้ชัดเจน
+        status: "PENDING",
+      },
+      include: {
+        job: {
+          select: { title: true, department: true, location: true },
+        },
       },
     });
+
+    // 4. ส่ง Email แจ้งเตือน (ทำงาน async ไม่ block response)
+    const emailData = {
+      applicantName: user.fullName || user.username,
+      applicantEmail: user.email || "",
+      jobTitle: application.job.title,
+      jobDepartment: application.job.department,
+      jobLocation: application.job.location,
+    };
+
+    // 4.1 ส่ง email ยืนยันให้ผู้สมัคร
+    sendApplicationConfirmationEmail(emailData).catch((err) =>
+      console.error("❌ Failed to send confirmation email:", err)
+    );
+
+    // 4.2 ส่ง email แจ้ง HR/Admin
+    prisma.user
+      .findMany({
+        where: { role: { in: ["ADMIN", "HR"] }, email: { not: null } },
+        select: { email: true },
+      })
+      .then((hrUsers) => {
+        const hrEmails = hrUsers
+          .map((u) => u.email)
+          .filter((e): e is string => e !== null && e !== "");
+        if (hrEmails.length > 0) {
+          sendNewApplicationNotifyHR({ ...emailData, hrEmails }).catch((err) =>
+            console.error("❌ Failed to send HR notification email:", err)
+          );
+        }
+      })
+      .catch((err) => console.error("❌ Failed to fetch HR emails:", err));
 
     return NextResponse.json({ success: true }, { status: 201 });
 
@@ -108,8 +150,32 @@ export async function PATCH(req: Request) {
     const updated = await prisma.application.update({
       where: { id: applicationId },
       data: { status },
-      include: { job: true, user: { select: { fullName: true, username: true } } },
+      include: {
+        job: {
+          select: { title: true, department: true, location: true },
+        },
+        user: {
+          select: { fullName: true, username: true, email: true },
+        },
+      },
     });
+
+    // ส่ง Email แจ้งผลการพิจารณา (เฉพาะ ACCEPTED / REJECTED)
+    if (
+      (status === "ACCEPTED" || status === "REJECTED") &&
+      updated.user?.email
+    ) {
+      sendApplicationStatusUpdateEmail({
+        applicantName: updated.user.fullName || updated.user.username,
+        applicantEmail: updated.user.email,
+        jobTitle: updated.job.title,
+        jobDepartment: updated.job.department,
+        jobLocation: updated.job.location,
+        newStatus: status as "ACCEPTED" | "REJECTED",
+      }).catch((err) =>
+        console.error("❌ Failed to send status update email:", err)
+      );
+    }
 
     return NextResponse.json({ success: true, application: updated });
   } catch (error) {
