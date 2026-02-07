@@ -1,7 +1,7 @@
 // src/actions/getJobs.ts
 'use server'
 
-import { prisma } from "@/lib/prisma" // ปรับตาม path จริงของคุณ
+import { prisma } from "@/lib/db/prisma"
 
 const ITEMS_PER_PAGE = 6;
 

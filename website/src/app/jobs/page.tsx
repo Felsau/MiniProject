@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { Briefcase, ChevronLeft, ChevronRight, Upload, FileText, X, Loader2 } from "lucide-react";
 import { JobFilterComponent } from "@/components/recruitment/JobFilterComponent";
 import { useFilteredJobs } from "@/hooks/useJobFilter";
-import type { JobFilterCriteria } from "@/lib/jobService";
+import type { JobFilterCriteria } from "@/lib/services/jobService";
 import { JobCard } from "@/components/recruitment/JobCard";
 
 interface FilterOptions {

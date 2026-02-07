@@ -1,6 +1,6 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db/prisma";
 import { revalidatePath } from "next/cache";
-import { JobWithCount } from "@/types"; // ⚠️ อย่าลืมสร้างไฟล์ types/index.ts ตามที่เคยแนะนำนะครับ
+import { JobWithCount } from "@/types";
 
 /**
  * Job creation data interface
@@ -40,7 +40,6 @@ export async function getAllJobs(): Promise<JobWithCount[]> {
             username: true,
           }
         },
-        // ✅ เพิ่มส่วนนี้: นับจำนวนใบสมัคร
         _count: {
           select: { applications: true }
         }

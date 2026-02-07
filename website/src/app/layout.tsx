@@ -3,9 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
-import SessionProvider from "@/components/SessionProvider";
-import Sidebar from "@/components/Sidebar";
-import LayoutWrapper from "@/components/LayoutWrapper";
+import SessionProvider from "@/components/layout/SessionProvider";
+import Sidebar from "@/components/layout/Sidebar";
+import LayoutWrapper from "@/components/layout/LayoutWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

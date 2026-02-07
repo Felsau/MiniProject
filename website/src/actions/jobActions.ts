@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db/prisma";
 import { revalidatePath } from "next/cache";
 
 // NOTE: createJobAction, getJobsAction, getDepartmentsAction were removed

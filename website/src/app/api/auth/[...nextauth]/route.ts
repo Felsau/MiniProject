@@ -1,6 +1,6 @@
 import NextAuth, { AuthOptions } from "next-auth" // เพิ่ม AuthOptions
 import CredentialsProvider from "next-auth/providers/credentials"
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@/lib/db/prisma"
 import bcrypt from "bcrypt"
 
 // 1. แยก Config ออกมาเป็นตัวแปร และใส่ export

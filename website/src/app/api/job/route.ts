@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { prisma } from "@/lib/prisma";
-import { getUserAuthStatus } from "@/lib/apiHelpers";
-import { type JobFilterCriteria } from "@/lib/jobService";
+import { prisma } from "@/lib/db/prisma";
+import { getUserAuthStatus } from "@/lib/auth/apiHelpers";
+import { type JobFilterCriteria } from "@/lib/services/jobService";
 
 /**
  * GET all active jobs (or all jobs if admin)

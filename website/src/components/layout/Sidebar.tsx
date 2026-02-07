@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { LogOut, Building2 } from "lucide-react";
-import { handleLogoutUser } from "@/utils/authHelpers";
+import { handleLogoutUser } from "@/lib/auth/authHelpers";
 import { getSidebarMenuItems } from "@/utils/getSidebarMenuItems";
 
 export default function Sidebar() {

@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db/prisma";
 import JobList from "@/components/recruitment/JobList";
 import AddJobModal from "@/components/recruitment/AddJobModal";
 import Pagination from "@/components/ui/Pagination";

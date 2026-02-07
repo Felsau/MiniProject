@@ -11,12 +11,11 @@ import nodemailer from "nodemailer";
  *   2. Development: ใช้ Ethereal (fake SMTP สำหรับ test)
  */
 function createTransporter() {
-  // ถ้ามีการตั้งค่า SMTP จริง
   if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
     return nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT || "587"),
-      secure: process.env.SMTP_SECURE === "true", // true สำหรับ port 465
+      secure: process.env.SMTP_SECURE === "true",
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
@@ -24,8 +23,6 @@ function createTransporter() {
     });
   }
 
-  // Development mode: ใช้ Ethereal (จำลอง email - ไม่ส่งจริง)
-  // ดู email ที่ส่งได้ที่ https://ethereal.email
   return nodemailer.createTransport({
     host: "smtp.ethereal.email",
     port: 587,
@@ -38,18 +35,12 @@ function createTransporter() {
 
 const transporter = createTransporter();
 
-/**
- * อีเมลผู้ส่ง (From)
- */
 const FROM_EMAIL = process.env.SMTP_FROM || "Job Recruitment System <noreply@recruitment.com>";
 
 // ============================================
 // Email Templates
 // ============================================
 
-/**
- * Base HTML template wrapper
- */
 function baseTemplate(content: string): string {
   return `
 <!DOCTYPE html>
@@ -60,15 +51,12 @@ function baseTemplate(content: string): string {
 </head>
 <body style="margin:0; padding:0; background-color:#f3f4f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
   <div style="max-width:600px; margin:0 auto; padding:20px;">
-    <!-- Header -->
     <div style="background: linear-gradient(135deg, #2563eb, #4f46e5); padding:30px; border-radius:16px 16px 0 0; text-align:center;">
       <h1 style="color:white; margin:0; font-size:24px;">💼 Job Recruitment System</h1>
     </div>
-    <!-- Content -->
     <div style="background:white; padding:30px; border-radius:0 0 16px 16px; box-shadow:0 4px 6px rgba(0,0,0,0.05);">
       ${content}
     </div>
-    <!-- Footer -->
     <div style="text-align:center; padding:20px; color:#9ca3af; font-size:12px;">
       <p>อีเมลนี้ส่งจากระบบอัตโนมัติ กรุณาอย่าตอบกลับ</p>
       <p>© ${new Date().getFullYear()} Job Recruitment System</p>
@@ -108,7 +96,6 @@ export async function sendApplicationConfirmationEmail(data: ApplicationEmailDat
       ใบสมัครของคุณได้ถูกส่งเรียบร้อยแล้ว
     </p>
     
-    <!-- Job Details Box -->
     <div style="background:#f0f9ff; border:1px solid #bfdbfe; border-radius:12px; padding:20px; margin:20px 0;">
       <h3 style="margin:0 0 12px 0; color:#1e40af;">📋 รายละเอียดตำแหน่ง</h3>
       <table style="width:100%; border-collapse:collapse;">
@@ -129,7 +116,6 @@ export async function sendApplicationConfirmationEmail(data: ApplicationEmailDat
       </table>
     </div>
 
-    <!-- Status -->
     <div style="background:#fefce8; border:1px solid #fde68a; border-radius:12px; padding:16px; margin:20px 0; text-align:center;">
       <p style="margin:0; color:#92400e; font-size:14px;">
         ⏳ สถานะปัจจุบัน: <strong>รอพิจารณา (PENDING)</strong>
@@ -168,7 +154,6 @@ export async function sendNewApplicationNotifyHR(
       มีผู้สมัครงานใหม่เข้ามาในระบบ
     </p>
     
-    <!-- Applicant Info -->
     <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:20px; margin:20px 0;">
       <h3 style="margin:0 0 12px 0; color:#166534;">👤 ข้อมูลผู้สมัคร</h3>
       <table style="width:100%; border-collapse:collapse;">
@@ -183,7 +168,6 @@ export async function sendNewApplicationNotifyHR(
       </table>
     </div>
     
-    <!-- Job Details -->
     <div style="background:#f0f9ff; border:1px solid #bfdbfe; border-radius:12px; padding:20px; margin:20px 0;">
       <h3 style="margin:0 0 12px 0; color:#1e40af;">📋 ตำแหน่งที่สมัคร</h3>
       <table style="width:100%; border-collapse:collapse;">
@@ -260,7 +244,6 @@ export async function sendApplicationStatusUpdateEmail(data: StatusUpdateEmailDa
       สวัสดีคุณ <strong>${data.applicantName}</strong>,
     </p>
     
-    <!-- Job Details -->
     <div style="background:#f0f9ff; border:1px solid #bfdbfe; border-radius:12px; padding:20px; margin:20px 0;">
       <h3 style="margin:0 0 12px 0; color:#1e40af;">📋 ตำแหน่งที่สมัคร</h3>
       <table style="width:100%; border-collapse:collapse;">
@@ -281,7 +264,6 @@ export async function sendApplicationStatusUpdateEmail(data: StatusUpdateEmailDa
       </table>
     </div>
 
-    <!-- Status Result -->
     <div style="background:${statusConfig.statusBg}; border:1px solid ${statusConfig.statusBorder}; border-radius:12px; padding:20px; margin:20px 0; text-align:center;">
       <p style="margin:0; font-size:18px; font-weight:700; color:${statusConfig.statusColor};">
         ${statusConfig.emoji} ${statusConfig.statusText}
@@ -342,7 +324,6 @@ async function sendEmail(options: SendEmailOptions) {
     console.log(`✅ Email sent: ${options.subject} -> ${options.to}`);
     console.log(`   Message ID: ${info.messageId}`);
 
-    // ถ้าใช้ Ethereal จะมี preview URL
     const previewUrl = nodemailer.getTestMessageUrl(info);
     if (previewUrl) {
       console.log(`   📧 Preview URL: ${previewUrl}`);

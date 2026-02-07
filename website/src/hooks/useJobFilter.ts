@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import type { JobFilterCriteria } from "@/lib/jobService";
+import type { JobFilterCriteria } from "@/lib/services/jobService";
 import type { JobWithCount } from "@/types";
 
 /**

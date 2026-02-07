@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "../api/auth/[...nextauth]/route"
 import { redirect } from "next/navigation"
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@/lib/db/prisma"
 import Link from "next/link"
 import { ArrowLeft, User, Briefcase, Calendar, Shield, Mail, Phone, FileText, MapPin, Award } from "lucide-react"
 

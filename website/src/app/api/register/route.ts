@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth"
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@/lib/db/prisma"
 import bcrypt from "bcrypt"
 // 1. 👇 เพิ่มบรรทัดนี้ เพื่อดึง Config มาใช้
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"

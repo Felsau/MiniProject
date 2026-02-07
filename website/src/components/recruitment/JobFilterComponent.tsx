@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { JobFilterCriteria } from "@/lib/jobService";
+import type { JobFilterCriteria } from "@/lib/services/jobService";
 import { useJobFilter } from "@/hooks/useJobFilter";
 
 interface FilterOptions {
