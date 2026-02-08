@@ -34,8 +34,11 @@ model User {
   // Relations
   jobs         Job[]        // งานที่สร้าง
   
-  // ✅ เพิ่มบรรทัดนี้ครับ: เพื่อรับความสัมพันธ์จากตาราง Application
+  // เพิ่มบรรทัดนี้ครับ: เพื่อรับความสัมพันธ์จากตาราง Application
   applications Application[] 
+
+  // เพิ่ม relation สำหรับ bookmarks
+  savedJobs    SavedJob[]   @relation("savedJobs") 
 
   @@map("User")
 }
@@ -66,8 +69,11 @@ model Job {
   postedByUser User @relation(fields: [postedBy], references: [id], onDelete: Cascade)
   postedBy     String
 
-  // ✅ ความสัมพันธ์กับใบสมัคร (มีอยู่แล้ว ถูกต้องครับ)
+  // ความสัมพันธ์กับใบสมัคร (มีอยู่แล้ว ถูกต้องครับ)
   applications Application[]
+
+  // เพิ่ม relation สำหรับ bookmarks
+  savedBy   SavedJob[]
 
   @@map("Job")
 }
@@ -95,4 +101,20 @@ model Application {
   
   // ป้องกันการสมัครซ้ำในงานเดิม
   @@unique([jobId, userId])
+}
+
+// ============================================
+// Saved Job System (ระบบบันทึกงาน)
+// ============================================
+
+model SavedJob {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation("savedJobs", fields: [userId], references: [id])
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, jobId])
+  @@map("SavedJob")
 }

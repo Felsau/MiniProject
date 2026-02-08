@@ -10,94 +10,57 @@ import Pagination from "@/components/ui/Pagination";
 import { Briefcase, Users, Filter, TrendingUp } from "lucide-react";
 import { JobWithCount } from "@/types";
 import { useBookmark } from "@/hooks/useBookmark";
-import { useEffect, useState } from "react";
 
 // Type ให้รองรับ Next.js 15
 type Props = {
   searchParams: Promise<{ page?: string }>;
 };
 
-export default function RecruitmentPage(props: Props) {
-  const [session, setSession] = useState<any>(null);
-  const [userRole, setUserRole] = useState<string | undefined>(undefined);
-  const [jobs, setJobs] = useState<JobWithCount[]>([]);
-  const [totalJobCount, setTotalJobCount] = useState(0);
-  const [fullTimeCount, setFullTimeCount] = useState(0);
-  const [partTimeCount, setPartTimeCount] = useState(0);
-  const [contractCount, setContractCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState(true);
+export default async function RecruitmentPage(props: Props) {
+  const session = await getServerSession(authOptions);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const sessionData = await getServerSession(authOptions);
-        if (!sessionData) {
-          redirect("/");
-          return;
-        }
-
-        setSession(sessionData);
-        setUserRole((sessionData.user as { role?: string })?.role);
-
-        // รอรับค่า Page จาก URL
-        const searchParams = await props.searchParams;
-        const currentPage = Number(searchParams?.page) || 1;
-        const itemsPerPage = 6;
-        const skip = (currentPage - 1) * itemsPerPage;
-
-        // ใช้ Promise.all ดึงข้อมูลพร้อมกัน
-        const [jobsData, totalJobCountData, fullTimeCountData, partTimeCountData, contractCountData] = await Promise.all([
-          prisma.job.findMany({
-            take: itemsPerPage,
-            skip: skip,
-            include: {
-              postedByUser: {
-                select: {
-                  fullName: true,
-                  username: true,
-                },
-              },
-              _count: {
-                select: {
-                  applications: true,
-                },
-              },
-            },
-            orderBy: [
-              { createdAt: "desc" },
-              { id: "desc" }
-            ],
-          }),
-          prisma.job.count(),
-          prisma.job.count({ where: { employmentType: "FULL_TIME" } }),
-          prisma.job.count({ where: { employmentType: "PART_TIME" } }),
-          prisma.job.count({ where: { employmentType: "CONTRACT" } }),
-        ]);
-
-        setJobs(jobsData);
-        setTotalJobCount(totalJobCountData);
-        setFullTimeCount(fullTimeCountData);
-        setPartTimeCount(partTimeCountData);
-        setContractCount(contractCountData);
-        setTotalPages(Math.ceil(totalJobCountData / itemsPerPage));
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
+  if (!session) {
+    redirect("/");
   }
+
+  const userRole = (session.user as { role?: string })?.role;
+
+  // รอรับค่า Page จาก URL
+  const searchParams = await props.searchParams;
+  const currentPage = Number(searchParams?.page) || 1;
+  const itemsPerPage = 6;
+  const skip = (currentPage - 1) * itemsPerPage;
+
+  // ใช้ Promise.all ดึงข้อมูลพร้อมกัน
+  const [jobs, totalJobCount, fullTimeCount, partTimeCount, contractCount] = await Promise.all([
+    prisma.job.findMany({
+      take: itemsPerPage,
+      skip: skip,
+      include: {
+        postedByUser: {
+          select: {
+            fullName: true,
+            username: true,
+          },
+        },
+        _count: {
+          select: {
+            applications: true,
+          },
+        },
+      },
+      orderBy: [
+        { createdAt: "desc" },
+        { id: "desc" }
+      ],
+    }),
+    prisma.job.count(),
+    prisma.job.count({ where: { employmentType: "FULL_TIME" } }),
+    prisma.job.count({ where: { employmentType: "PART_TIME" } }),
+    prisma.job.count({ where: { employmentType: "CONTRACT" } }),
+  ]);
+
+  const totalPages = Math.ceil(totalJobCount / itemsPerPage);
 
   return (
     <div className="min-h-screen p-8 bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -213,7 +176,7 @@ export default function RecruitmentPage(props: Props) {
         <div className="p-6">
           {/* List แสดงงาน (เฉพาะหน้าปัจจุบัน) */}
           <RecruitmentClientWrapper 
-            jobs={jobs} 
+            jobs={jobs as JobWithCount[]} 
             userRole={userRole} 
           />
           

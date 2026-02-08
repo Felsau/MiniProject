@@ -11,12 +11,15 @@ import { JobWithCount } from "@/types";
 interface JobListProps {
   jobs: JobWithCount[];
   userRole?: string;
+  bookmarkedJobIds?: string[];
+  onBookmark?: (jobId: string) => Promise<void>;
+  onUnbookmark?: (jobId: string) => Promise<void>;
 }
 
-export function JobList({ jobs, userRole }: JobListProps) {
+export function JobList({ jobs, userRole, bookmarkedJobIds, onBookmark, onUnbookmark }: JobListProps) {
   const router = useRouter();
 
-  // --- ✅ 1. เพิ่ม State สำหรับค้นหาและกรองกลับมา ---
+  // --- 1. เพิ่ม State สำหรับค้นหาและกรองกลับมา ---
   const [searchTerm, setSearchTerm] = useState("");
   const [showInactive, setShowInactive] = useState(false); // ควบคุมการเปิด/ปิดงานที่นี่เลย
 
@@ -110,6 +113,9 @@ export function JobList({ jobs, userRole }: JobListProps) {
               key={job.id}
               job={job}
               userRole={userRole}
+              isBookmarked={bookmarkedJobIds?.includes(job.id)}
+              onBookmark={onBookmark}
+              onUnbookmark={onUnbookmark}
               onEdit={handleEdit}
               onKill={(jobId) => handleJobAction(handleKillJob, jobId)}
               onRestore={(jobId) => handleJobAction(handleRestoreJob, jobId)}

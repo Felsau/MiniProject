@@ -12,10 +12,12 @@ import {
   RotateCcw,
   Users,
   Loader2,
-  Bookmark
+  Bookmark,
+  BookmarkCheck
 } from "lucide-react";
 import { getEmploymentTypeLabel } from "@/utils/jobListHelpers";
 import { JobWithCount } from "@/types";
+import { useState } from "react";
 
 interface JobCardProps {
   job: JobWithCount;
@@ -26,6 +28,9 @@ interface JobCardProps {
   onDelete?: (jobId: string) => Promise<boolean>;
   onApply?: () => void;
   isApplying?: boolean;
+  isBookmarked?: boolean;
+  onBookmark?: (jobId: string) => Promise<void>;
+  onUnbookmark?: (jobId: string) => Promise<void>;
 }
 
 export function JobCard({
@@ -36,10 +41,34 @@ export function JobCard({
   onRestore,
   onDelete,
   onApply,
-  isApplying
+  isApplying,
+  isBookmarked = false,
+  onBookmark,
+  onUnbookmark
 }: JobCardProps) {
   const applicantCount = job._count?.applications || 0;
   const isAdminOrHR = userRole === "ADMIN" || userRole === "HR";
+  const [bookmarking, setBookmarking] = useState(false);
+  const [bookmarked, setBookmarked] = useState(isBookmarked);
+
+  const handleBookmark = async () => {
+    if (bookmarking) return;
+    
+    setBookmarking(true);
+    try {
+      if (bookmarked) {
+        await onUnbookmark?.(job.id);
+        setBookmarked(false);
+      } else {
+        await onBookmark?.(job.id);
+        setBookmarked(true);
+      }
+    } catch (error) {
+      console.error("Bookmark error:", error);
+    } finally {
+      setBookmarking(false);
+    }
+  };
 
   // ✅ ปรับสีพื้นหลังให้เด่นชัดขึ้น
   const cardStyle = job.isActive
@@ -182,8 +211,23 @@ export function JobCard({
             >
               {isApplying ? <Loader2 size={16} className="animate-spin" /> : (job.isActive ? "สมัครงาน" : "ปิดรับแล้ว")}
             </button>
-            <button className="px-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-gray-500" title="บันทึกงาน">
-              <Bookmark size={18} />
+            <button 
+              onClick={handleBookmark}
+              disabled={bookmarking}
+              className={`px-3 rounded-lg transition flex items-center justify-center ${
+                bookmarked 
+                  ? "bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100" 
+                  : "border border-gray-300 hover:bg-gray-50 text-gray-500"
+              }`}
+              title={bookmarked ? "เลิกบันทึกงาน" : "บันทึกงาน"}
+            >
+              {bookmarking ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : bookmarked ? (
+                <BookmarkCheck size={18} />
+              ) : (
+                <Bookmark size={18} />
+              )}
             </button>
           </>
         )}

@@ -30,15 +30,11 @@ export default function BookmarksPage() {
 
   const fetchSavedJobs = useCallback(async () => {
     try {
-      // TODO: เปลี่ยนเป็น fetch จาก API จริง
-      // const res = await fetch("/api/bookmark");
-      // if (res.ok) {
-      //   const data = await res.json();
-      //   setSavedJobs(data);
-      // }
-
-      // Placeholder: แสดง empty state
-      setSavedJobs([]);
+      const res = await fetch("/api/bookmark");
+      if (res.ok) {
+        const data = await res.json();
+        setSavedJobs(data);
+      }
     } catch (error) {
       console.error("Error fetching saved jobs:", error);
     } finally {
@@ -50,12 +46,20 @@ export default function BookmarksPage() {
     fetchSavedJobs();
   }, [fetchSavedJobs]);
 
-  const handleRemoveBookmark = async (savedJobId: string) => {
+  const handleRemoveBookmark = async (savedJobId: string, jobId: string) => {
     setRemovingId(savedJobId);
     try {
-      // TODO: เรียก API ลบ bookmark
-      // await fetch(`/api/bookmark/${savedJobId}`, { method: "DELETE" });
-      setSavedJobs((prev) => prev.filter((s) => s.id !== savedJobId));
+      const res = await fetch("/api/bookmark", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ jobId }),
+      });
+      
+      if (res.ok) {
+        setSavedJobs((prev) => prev.filter((s) => s.id !== savedJobId));
+      }
     } catch (error) {
       console.error("Error removing bookmark:", error);
     } finally {
@@ -104,7 +108,7 @@ export default function BookmarksPage() {
                 />
                 {/* ปุ่มลบ bookmark */}
                 <button
-                  onClick={() => handleRemoveBookmark(saved.id)}
+                  onClick={() => handleRemoveBookmark(saved.id, saved.job?.id || '')}
                   disabled={removingId === saved.id}
                   className="absolute top-3 right-3 p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition disabled:opacity-50"
                   title="ลบออกจากรายการ"

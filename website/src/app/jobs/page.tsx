@@ -6,6 +6,7 @@ import { JobFilterComponent } from "@/components/recruitment/JobFilterComponent"
 import { useFilteredJobs } from "@/hooks/useJobFilter";
 import type { JobFilterCriteria } from "@/lib/services/jobService";
 import { JobCard } from "@/components/recruitment/JobCard";
+import { useBookmark } from "@/hooks/useBookmark";
 
 interface FilterOptions {
   departments: string[];
@@ -55,6 +56,7 @@ function generatePageNumbers(current: number, total: number): (number | "...")[]
 
 export default function JobsPage() {
   const { jobs, loading, error, currentPage, totalPages, totalCount, fetchJobs } = useFilteredJobs();
+  const { bookmarkedJobIds, handleBookmark, handleUnbookmark } = useBookmark();
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     departments: [],
     locations: [],
@@ -232,6 +234,9 @@ export default function JobsPage() {
                   userRole="USER"
                   isApplying={applyingJobId === job.id}
                   onApply={() => openApplyModal(job.id, job.title)}
+                  isBookmarked={bookmarkedJobIds.includes(job.id)}
+                  onBookmark={handleBookmark}
+                  onUnbookmark={handleUnbookmark}
                 />
               ))}
             </div>
