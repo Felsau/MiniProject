@@ -12,10 +12,11 @@ import {
   RotateCcw,
   Users,
   Loader2,
-  Bookmark
+  Bookmark,
 } from "lucide-react";
 import { getEmploymentTypeLabel } from "@/utils/jobListHelpers";
 import { JobWithCount } from "@/types";
+import Link from "next/link";
 
 interface JobCardProps {
   job: JobWithCount;
@@ -43,12 +44,12 @@ export function JobCard({
 
   // ✅ ปรับสีพื้นหลังให้เด่นชัดขึ้น
   const cardStyle = job.isActive
-    ? "bg-white border-gray-200 hover:shadow-md" 
+    ? "bg-white border-gray-200 hover:shadow-md"
     : "bg-gray-100 border-gray-300 border-dashed opacity-90"; // สีเทาเข้มขึ้น + ขอบเส้นประ
 
   return (
     <div className={`group rounded-xl border p-5 shadow-sm transition-all duration-200 flex flex-col h-full relative ${cardStyle}`}>
-      
+
       {/* 1. ส่วนหัว (Title & Status) */}
       <div className="flex justify-between items-start mb-3">
         <h3 className={`text-lg font-bold line-clamp-2 leading-tight ${job.isActive ? 'text-gray-900' : 'text-gray-500'}`}>
@@ -86,11 +87,10 @@ export function JobCard({
 
       {/* 3. Badge ประเภทงาน */}
       <div className="mb-4">
-        <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full border ${
-          job.isActive 
-            ? "bg-blue-50 text-blue-600 border-blue-100" 
+        <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full border ${job.isActive
+            ? "bg-blue-50 text-blue-600 border-blue-100"
             : "bg-gray-200 text-gray-500 border-gray-300"
-        }`}>
+          }`}>
           {getEmploymentTypeLabel(job.employmentType)}
         </span>
       </div>
@@ -102,7 +102,7 @@ export function JobCard({
 
       {/* 5. Footer: รวมข้อมูล ผู้โพสต์ + จำนวนคนสมัคร + วันที่ */}
       <div className="pt-4 border-t border-gray-100 text-xs text-gray-400 flex justify-between items-center mb-4 mt-auto">
-        
+
         {/* ชื่อคนโพสต์ */}
         <div className="flex items-center gap-1.5 overflow-hidden mr-2">
           <User size={12} className="shrink-0" />
@@ -128,56 +128,66 @@ export function JobCard({
       </div>
 
       {/* 6. ปุ่มดำเนินการ (Buttons) */}
-      <div className="flex gap-2 h-10">
+      <div className="mt-auto pt-2"> {/* ✅ เอา h-10 ออก เพื่อให้ความสูงยืดหยุ่นตามเนื้อหา */}
         {isAdminOrHR ? (
-          <div className="flex-1 flex gap-2">
-             {/* ปุ่มแก้ไข */}
-             <button 
-                onClick={() => onEdit?.(job)} 
+          <div className="flex flex-col gap-2 w-full">
+            {/* --- แถวที่ 1: ปุ่มดูผู้สมัคร (กว้างเต็มแถว แถวเดียวเน้นๆ) --- */}
+            <Link
+              href={`/recruitment/${job.id}/applicants`}
+              className="w-full py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 text-sm font-bold shadow-sm"
+            >
+              <Users size={18} /> 
+              <span>ดูผู้สมัคร ({applicantCount} คน)</span>
+            </Link>
+
+            {/* --- แถวที่ 2: ปุ่มจัดการอื่นๆ --- */}
+            <div className="flex gap-2 h-10">
+              {/* ปุ่มแก้ไข (เหลือแค่อันเดียวและกว้างขยายตามพื้นที่) */}
+              <button
+                onClick={() => onEdit?.(job)}
                 className="flex-1 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition flex items-center justify-center gap-2 text-sm font-medium"
                 title="แก้ไขข้อมูล"
-             >
-                <Edit2 size={16}/> <span className="hidden xl:inline">แก้ไข</span>
-             </button>
+              >
+                <Edit2 size={16} /> <span>แก้ไข</span>
+              </button>
 
-             {/* ปุ่มสลับ ปิด/เปิด */}
-             {job.isActive ? (
-               <button 
-                  onClick={() => onKill?.(job.id)} 
-                  className="px-3 bg-yellow-50 text-yellow-600 border border-yellow-200 rounded-lg hover:bg-yellow-100 transition"
-                  title="ปิดรับสมัครงานนี้"
-               >
-                  <Power size={18}/>
-               </button>
-             ) : (
-               <button 
-                  onClick={() => onRestore?.(job.id)} 
-                  className="px-3 bg-green-50 text-green-600 border border-green-200 rounded-lg hover:bg-green-100 transition"
+              {/* ปุ่มสลับ ปิด/เปิด (กว้างคงที่) */}
+              {job.isActive ? (
+                <button
+                  onClick={() => onKill?.(job.id)}
+                  className="px-3 bg-yellow-50 text-yellow-600 border border-yellow-200 rounded-lg hover:bg-yellow-100 transition flex items-center justify-center"
+                  title="ปิดรับสมัคร"
+                >
+                  <Power size={18} />
+                </button>
+              ) : (
+                <button
+                  onClick={() => onRestore?.(job.id)}
+                  className="px-3 bg-green-50 text-green-600 border border-green-200 rounded-lg hover:bg-green-100 transition flex items-center justify-center"
                   title="เปิดรับสมัครอีกครั้ง"
-               >
-                  <RotateCcw size={18}/>
-               </button>
-             )}
+                >
+                  <RotateCcw size={18} />
+                </button>
+              )}
 
-             {/* ปุ่มลบ */}
-             <button 
-                onClick={() => onDelete?.(job.id)} 
-                className="px-3 bg-red-50 text-red-500 border border-red-200 rounded-lg hover:bg-red-100 transition"
+              {/* ปุ่มลบ (กว้างคงที่) */}
+              <button
+                onClick={() => onDelete?.(job.id)}
+                className="px-3 bg-red-50 text-red-500 border border-red-200 rounded-lg hover:bg-red-100 transition flex items-center justify-center"
                 title="ลบถาวร"
-             >
-                <Trash2 size={18}/>
-             </button>
+              >
+                <Trash2 size={18} />
+              </button>
+            </div>
           </div>
         ) : (
-          /* ฝั่ง User */
-          <>
+          /* ฝั่ง User: สมัครงาน (จัดกลุ่มให้สวยงาม) */
+          <div className="flex gap-2 h-10 w-full">
             <button
               onClick={onApply}
               disabled={isApplying || !job.isActive}
-              className={`flex-1 px-4 text-white rounded-lg transition font-medium flex items-center justify-center gap-2 shadow-sm ${
-                job.isActive 
-                ? "bg-blue-600 hover:bg-blue-700" 
-                : "bg-gray-400 cursor-not-allowed"
+              className={`flex-1 px-4 text-white rounded-lg transition font-bold flex items-center justify-center gap-2 shadow-sm ${
+                job.isActive ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"
               }`}
             >
               {isApplying ? <Loader2 size={16} className="animate-spin" /> : (job.isActive ? "สมัครงาน" : "ปิดรับแล้ว")}
@@ -185,7 +195,7 @@ export function JobCard({
             <button className="px-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-gray-500" title="บันทึกงาน">
               <Bookmark size={18} />
             </button>
-          </>
+          </div>
         )}
       </div>
 
