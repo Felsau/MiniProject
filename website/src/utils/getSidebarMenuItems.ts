@@ -43,7 +43,6 @@ export function getSidebarMenuItems(userRole: string): MenuItem[] {
     ];
   }
 
-  // ADMIN / HR menu
   return [
     {
       name: "Dashboard",

@@ -8,12 +8,10 @@ export default function LayoutWrapper({ children }: { children: ReactNode }) {
   const { data: session, status } = useSession();
   const pathname = usePathname();
 
-  // ไม่ใส่ margin-left ในหน้า login และหน้า home
   if (pathname === "/" || pathname === "/login") {
     return <>{children}</>;
   }
 
-  // ตรวจสอบว่ามี session และมี role ที่ถูกต้อง
   const userRole = (session?.user as { role?: string })?.role;
   const showSidebar = status !== "loading" && session && (userRole === "HR" || userRole === "ADMIN" || userRole === "USER");
 

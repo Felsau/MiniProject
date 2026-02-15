@@ -33,7 +33,6 @@ export default function Sidebar() {
       {/* Decorative Background */}
       <div className="absolute top-0 left-0 w-full h-48 bg-linear-to-br from-blue-600 via-blue-500 to-indigo-600 opacity-10 pointer-events-none"></div>
       
-      {/* Header with Logo */}
       <div className="relative p-6 border-b border-gray-100 z-10">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-12 h-12 bg-linear-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -48,7 +47,6 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Menu */}
       <nav className="flex-1 p-4 relative z-10">
         <ul className="space-y-2">
           {menuItems.map((item) => {
@@ -83,7 +81,6 @@ export default function Sidebar() {
         </ul>
       </nav>
 
-      {/* User Profile & Logout */}
       <div className="p-4 border-t border-gray-100 bg-linear-to-b from-transparent to-gray-50">
         {/* User Info Card */}
         <div className="bg-linear-to-br from-blue-50 to-indigo-50 rounded-xl p-4 mb-3 border border-blue-100">
@@ -102,7 +99,6 @@ export default function Sidebar() {
           </div>
         </div>
 
-        {/* Logout Button */}
         <button
           onClick={handleLogout}
           className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-600 hover:text-white hover:bg-red-600 rounded-xl transition-all duration-200 border-2 border-red-200 hover:border-red-600"
