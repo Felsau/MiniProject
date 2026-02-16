@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth/authOptions";
 import { prisma } from "@/lib/db/prisma";
 import { getUserAuthStatus } from "@/lib/auth/apiHelpers";
 import { type JobFilterCriteria } from "@/lib/services/jobService";
@@ -14,12 +14,10 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const session = await getServerSession(authOptions);
 
-    // Determine if user is admin/hr
     const isAdminOrHR = session?.user?.name
       ? await getUserAuthStatus(session.user.name as string)
       : false;
 
-    // Build filter criteria from query parameters
     const filterCriteria: JobFilterCriteria = {
       searchKeyword: searchParams.get("search") || undefined,
       department: searchParams.get("department") || undefined,
@@ -34,17 +32,14 @@ export async function GET(req: Request) {
       isActive: searchParams.get("isActive") === "false" ? false : true,
     };
 
-    // If admin/hr requests inactive jobs, set isActive to undefined (show all)
     if (isAdminOrHR && searchParams.get("includeInactive") === "true") {
       filterCriteria.isActive = undefined;
     }
 
-    // Pagination params
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "6");
     const skip = (page - 1) * limit;
 
-    // Build where clause
     const where: Record<string, unknown> = {};
 
     if (!isAdminOrHR) {
@@ -83,7 +78,6 @@ export async function GET(req: Request) {
       },
     };
 
-    // ดึงข้อมูล + นับจำนวนทั้งหมดพร้อมกัน
     const [jobs, totalCount] = await Promise.all([
       prisma.job.findMany({
         where,
@@ -115,7 +109,6 @@ export async function GET(req: Request) {
  */
 export async function POST(req: Request) {
   try {
-    // 1. เช็คว่า Login หรือยัง?
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user?.name) {
@@ -125,7 +118,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. ดึงข้อมูล User คนที่โพสต์
     const user = await prisma.user.findUnique({
       where: { username: session.user.name as string },
     });
@@ -137,7 +129,13 @@ export async function POST(req: Request) {
       );
     }
 
-    // 3. รับข้อมูลจากฟอร์ม
+    if (user.role !== "ADMIN" && user.role !== "HR") {
+      return NextResponse.json(
+        { error: "คุณไม่มีสิทธิ์สร้างประกาศงาน" },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
     const {
       title,
@@ -151,7 +149,6 @@ export async function POST(req: Request) {
       benefits,
     } = body;
 
-    // 4. บันทึกลง Database
     const newJob = await prisma.job.create({
       data: {
         title,

@@ -71,10 +71,9 @@ export function JobCard({
     }
   };
 
-  // ✅ ปรับสีพื้นหลังให้เด่นชัดขึ้น
   const cardStyle = job.isActive
     ? "bg-white border-gray-200 hover:shadow-md"
-    : "bg-gray-100 border-gray-300 border-dashed opacity-90"; // สีเทาเข้มขึ้น + ขอบเส้นประ
+    : "bg-gray-100 border-gray-300 border-dashed opacity-90";
 
   return (
     <div className={`group rounded-xl border p-5 shadow-sm transition-all duration-200 flex flex-col h-full relative ${cardStyle}`}>
@@ -84,7 +83,6 @@ export function JobCard({
         <h3 className={`text-lg font-bold line-clamp-2 leading-tight ${job.isActive ? 'text-gray-900' : 'text-gray-500'}`}>
           {job.title}
         </h3>
-        {/* ป้ายสถานะ */}
         {!job.isActive && (
           <span className="shrink-0 ml-2 px-2 py-1 bg-red-100 text-red-700 text-[13px] font-bold rounded-full border border-red-200">
             ปิดรับสมัคร
@@ -157,10 +155,10 @@ export function JobCard({
       </div>
 
       {/* 6. ปุ่มดำเนินการ (Buttons) */}
-      <div className="mt-auto pt-2"> {/* ✅ เอา h-10 ออก เพื่อให้ความสูงยืดหยุ่นตามเนื้อหา */}
+      <div className="mt-auto pt-2">
         {isAdminOrHR ? (
           <div className="flex flex-col gap-2 w-full">
-            {/* --- แถวที่ 1: ปุ่มดูผู้สมัคร (กว้างเต็มแถว แถวเดียวเน้นๆ) --- */}
+            {/* --- แถวที่ 1: ปุ่มดูผู้สมัคร --- */}
             <Link
               href={`/recruitment/${job.id}/applicants`}
               className="w-full py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 text-sm font-bold shadow-sm"
@@ -169,9 +167,8 @@ export function JobCard({
               <span>ดูผู้สมัคร ({applicantCount} คน)</span>
             </Link>
 
-            {/* --- แถวที่ 2: ปุ่มจัดการอื่นๆ --- */}
+            {/* --- แถวที่ 2: ปุ่มจัดการ --- */}
             <div className="flex gap-2 h-10">
-              {/* ปุ่มแก้ไข (เหลือแค่อันเดียวและกว้างขยายตามพื้นที่) */}
               <button
                 onClick={() => onEdit?.(job)}
                 className="flex-1 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition flex items-center justify-center gap-2 text-sm font-medium"
@@ -180,7 +177,6 @@ export function JobCard({
                 <Edit2 size={16} /> <span>แก้ไข</span>
               </button>
 
-              {/* ปุ่มสลับ ปิด/เปิด (กว้างคงที่) */}
               {job.isActive ? (
                 <button
                   onClick={() => onKill?.(job.id)}
@@ -199,7 +195,6 @@ export function JobCard({
                 </button>
               )}
 
-              {/* ปุ่มลบ (กว้างคงที่) */}
               <button
                 onClick={() => onDelete?.(job.id)}
                 className="px-3 bg-red-50 text-red-500 border border-red-200 rounded-lg hover:bg-red-100 transition flex items-center justify-center"
@@ -210,7 +205,6 @@ export function JobCard({
             </div>
           </div>
         ) : (
-          /* ฝั่ง User: สมัครงาน (จัดกลุ่มให้สวยงาม) */
           <div className="flex gap-2 h-10 w-full">
             <button
               onClick={onApply}

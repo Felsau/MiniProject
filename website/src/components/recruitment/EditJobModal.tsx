@@ -32,7 +32,6 @@ export function EditJobModal({
 }: EditJobModalProps) {
   const router = useRouter();
   
-  // Setup Hook
   const { formData, setAll, handleChange } = useJobForm({
     title: job.title,
     description: job.description || "",
@@ -60,21 +59,18 @@ export function EditJobModal({
       responsibilities: job.responsibilities || "",
       benefits: job.benefits || "",
     });
-  }, [job, setAll]); // ตัด setAll ออกจาก dependency ถ้า ESLint บ่น แต่ใส่ไว้ก็ไม่เป็นไร
+  }, [job, setAll]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      // ✅ ใช้ PATCH ได้แล้ว (ไม่ต้องมี as any)
       await submitJob(formData, "PATCH", job.id);
       
-      // ถ้าผ่านบรรทัดบนมาได้ แปลว่าสำเร็จ
-      alert("บันทึกข้อมูลเรียบร้อยแล้ว"); // (Optional) แจ้งเตือนหน่อยก็ดี
-      onClose(); // ปิด Modal
-      router.refresh(); // รีเฟรชหน้า
+      alert("บันทึกข้อมูลเรียบร้อยแล้ว");
+      onClose();
+      router.refresh();
     } catch {
-      // ถ้า Error มันจะเด้งมาตรงนี้
       alert("เกิดข้อผิดพลาดในการบันทึก กรุณาลองใหม่");
     }
   };
@@ -95,7 +91,6 @@ export function EditJobModal({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* ส่ง handleChange ไปให้ FormFields ใช้ */}
           <JobFormFields 
             formData={formData} 
             onFieldChange={(field, value) => handleChange(field as keyof import("@/hooks/useJobForm").JobFormData, value)}

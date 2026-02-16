@@ -47,7 +47,6 @@ export function JobFilterComponent({ onFilterChange, options }: JobFilterCompone
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-      {/* Search Bar with Toggle */}
       <div className="flex items-center gap-3 mb-6">
         <input
           type="text"
@@ -66,12 +65,9 @@ export function JobFilterComponent({ onFilterChange, options }: JobFilterCompone
         </button>
       </div>
 
-      {/* Expandable Filters */}
       {isExpanded && (
         <div className="mt-6 pt-6 border-t border-gray-200">
-          {/* Filter Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            {/* Department Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 แผนก
@@ -90,7 +86,6 @@ export function JobFilterComponent({ onFilterChange, options }: JobFilterCompone
               </select>
             </div>
 
-            {/* Location Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 สถานที่
@@ -109,7 +104,6 @@ export function JobFilterComponent({ onFilterChange, options }: JobFilterCompone
               </select>
             </div>
 
-            {/* Employment Type Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 ประเภทงาน
@@ -129,7 +123,6 @@ export function JobFilterComponent({ onFilterChange, options }: JobFilterCompone
             </div>
           </div>
 
-          {/* Salary Range Filter */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-3">
               ช่วงเงินเดือน (฿)
@@ -160,7 +153,6 @@ export function JobFilterComponent({ onFilterChange, options }: JobFilterCompone
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex justify-end">
             <button
               onClick={handleReset}
