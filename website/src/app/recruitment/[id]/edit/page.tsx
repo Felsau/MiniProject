@@ -4,8 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 
-// คุณอาจจะย้ายไปใช้ Shared Type จาก @/types/index.ts ที่เราสร้างไว้ก็ได้ครับ
-// แต่ถ้าจะประกาศ Local ไว้แบบนี้ก็ใช้งานได้เหมือนกันครับ
 interface Job {
   id: string;
   title: string;
@@ -78,7 +76,6 @@ export default function EditJobPage() {
     setLoading(true);
 
     try {
-      // ✅ แก้ไขตรงนี้: เปลี่ยนจาก "PUT" เป็น "PATCH" ให้ตรงกับไฟล์ API
       const res = await fetch(`/api/job/${jobId}`, {
         method: "PATCH", 
         headers: { "Content-Type": "application/json" },
@@ -115,7 +112,6 @@ export default function EditJobPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
-        {/* Back Button */}
         <button
           onClick={() => router.back()}
           className="inline-flex items-center gap-2 mb-8 text-gray-700 hover:text-gray-900 transition-colors"
@@ -124,22 +120,18 @@ export default function EditJobPage() {
           <span className="font-medium">กลับไป</span>
         </button>
 
-        {/* Page Title */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">แก้ไขตำแหน่งงาน</h1>
           <p className="text-gray-600 mt-2">อัปเดตข้อมูลตำแหน่งงานของคุณ</p>
         </div>
 
-        {/* Form Card */}
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           <form onSubmit={handleSubmit} className="p-8 space-y-8">
-            {/* Section 1: General Information */}
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-blue-100">
                 📋 ข้อมูลทั่วไป
               </h2>
 
-              {/* Job Title - Full Width */}
               <div className="mb-6">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   ชื่อตำแหน่ง <span className="text-red-500">*</span>
@@ -155,7 +147,6 @@ export default function EditJobPage() {
                 />
               </div>
 
-              {/* Grid: Department & Location */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -190,7 +181,6 @@ export default function EditJobPage() {
                 </div>
               </div>
 
-              {/* Grid: Salary & Employment Type */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -225,13 +215,11 @@ export default function EditJobPage() {
               </div>
             </div>
 
-            {/* Section 2: Job Details */}
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-blue-100">
                 📝 รายละเอียดงาน
               </h2>
 
-              {/* Description */}
               <div className="mb-6">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   คำอธิบายตำแหน่ง
@@ -246,7 +234,6 @@ export default function EditJobPage() {
                 />
               </div>
 
-              {/* Requirements */}
               <div className="mb-6">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   คุณสมบัติและความต้องการ
@@ -261,7 +248,6 @@ export default function EditJobPage() {
                 />
               </div>
 
-              {/* Responsibilities */}
               <div className="mb-6">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   หน้าที่ความรับผิดชอบ
@@ -276,7 +262,6 @@ export default function EditJobPage() {
                 />
               </div>
 
-              {/* Benefits */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   สวัสดิการและสิทธิประโยชน์
@@ -292,7 +277,6 @@ export default function EditJobPage() {
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
               <button
                 type="button"
