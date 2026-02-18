@@ -1,0 +1,120 @@
+// ============================================
+// Prisma Schema - Job Recruitment System
+// ============================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./Database.db"
+}
+
+// ============================================
+// User Management (ระบบผู้ใช้งาน)
+// ============================================
+
+model User {
+  id        String      @id @default(cuid())
+  username  String   @unique
+  password  String   // Hashed password
+  role      String   @default("USER") // ADMIN, HR, USER
+  
+  // Personal Information
+  fullName  String?
+  email     String?
+  phone     String?
+  position  String?
+  bio       String?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  
+  // Relations
+  jobs         Job[]        // งานที่สร้าง
+  
+  // เพิ่มบรรทัดนี้ครับ: เพื่อรับความสัมพันธ์จากตาราง Application
+  applications Application[] 
+
+  // เพิ่ม relation สำหรับ bookmarks
+  savedJobs    SavedJob[]   @relation("savedJobs") 
+
+  @@map("User")
+}
+
+// ============================================
+// Job Posting (ระบบประกาศงาน)
+// ============================================
+
+model Job {
+  id               String   @id @default(cuid())
+  title            String
+  description      String?
+  department       String?
+  location         String?
+  salary           String?
+  employmentType   String   @default("FULL_TIME")
+  requirements     String?
+  responsibilities String?
+  benefits         String?
+  isActive         Boolean  @default(true) // Kill section - soft delete flag
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  killedAt  DateTime? // Timestamp when job was killed
+
+  // Relations
+  postedByUser User @relation(fields: [postedBy], references: [id], onDelete: Cascade)
+  postedBy     String
+
+  // ความสัมพันธ์กับใบสมัคร (มีอยู่แล้ว ถูกต้องครับ)
+  applications Application[]
+
+  // เพิ่ม relation สำหรับ bookmarks
+  savedBy   SavedJob[]
+
+  @@map("Job")
+}
+
+// ============================================
+// Application System (ระบบใบสมัคร)
+// ============================================
+
+model Application {
+  id        String   @id @default(cuid())
+  status    String   @default("PENDING") // สถานะ: PENDING, APPROVED, REJECTED
+  
+  // Resume/CV Upload
+  resumeUrl String?  // Path to uploaded resume file (PDF)
+
+  // เชื่อมกับ Job
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  
+  // เชื่อมกับ User (แก้เป็น String เพื่อความชัวร์ หรือเช็ค model User ของคุณ)
+  userId    String   
+  user      User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  
+  // ป้องกันการสมัครซ้ำในงานเดิม
+  @@unique([jobId, userId])
+}
+
+// ============================================
+// Saved Job System (ระบบบันทึกงาน)
+// ============================================
+
+model SavedJob {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation("savedJobs", fields: [userId], references: [id])
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, jobId])
+  @@map("SavedJob")
+}
