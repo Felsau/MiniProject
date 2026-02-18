@@ -1,14 +1,24 @@
-// 📂 ไฟล์: src/app/api/job/[id]/applicants/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/authOptions";
+import { isUserAdminOrHR } from "@/lib/auth/sessionHelpers";
 
-// ✅ 1. เปลี่ยน Type ของ params ให้เป็น Promise
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // ✅ 2. ต้อง await params ก่อนเรียกใช้ id
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.name) {
+      return NextResponse.json({ error: "กรุณาเข้าสู่ระบบก่อน" }, { status: 401 });
+    }
+
+    const isAdmin = await isUserAdminOrHR(session.user.name as string);
+    if (!isAdmin) {
+      return NextResponse.json({ error: "คุณไม่มีสิทธิ์ดูข้อมูลผู้สมัคร" }, { status: 403 });
+    }
+
     const { id } = await params;
 
     const jobWithApplicants = await prisma.job.findUnique({
@@ -22,7 +32,7 @@ export async function GET(
                 fullName: true,
                 username: true,
                 email: true,
-                // image: true, // ถ้ามีรูปโปรไฟล์ให้เปิดบรรทัดนี้
+
               }
             }
           },

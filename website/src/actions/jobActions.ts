@@ -2,17 +2,31 @@
 
 import { prisma } from "@/lib/db/prisma";
 import { revalidatePath } from "next/cache";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/authOptions";
 
-// NOTE: createJobAction, getJobsAction, getDepartmentsAction were removed
-// because they referenced old schema models (job_position, departments)
-// that no longer exist in the current Prisma schema.
-// Use the API routes (/api/job) for job creation instead.
+async function requireAdminOrHRSession() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.name) {
+    return { authorized: false, error: "กรุณาเข้าสู่ระบบก่อน" };
+  }
+  const user = await prisma.user.findUnique({
+    where: { username: session.user.name as string },
+  });
+  if (!user || (user.role !== "ADMIN" && user.role !== "HR")) {
+    return { authorized: false, error: "คุณไม่มีสิทธิ์ดำเนินการนี้" };
+  }
+  return { authorized: true, user };
+}
 
 /**
  * Kill (soft delete) a job - mark as inactive
  */
 export async function killJobAction(jobId: string) {
   try {
+    const auth = await requireAdminOrHRSession();
+    if (!auth.authorized) return { success: false, error: auth.error };
+
     const updatedJob = await prisma.job.update({
       where: { id: jobId },
       data: {
@@ -34,6 +48,9 @@ export async function killJobAction(jobId: string) {
  */
 export async function restoreJobAction(jobId: string) {
   try {
+    const auth = await requireAdminOrHRSession();
+    if (!auth.authorized) return { success: false, error: auth.error };
+
     const updatedJob = await prisma.job.update({
       where: { id: jobId },
       data: {
@@ -55,12 +72,21 @@ export async function restoreJobAction(jobId: string) {
  */
 export async function getInactiveJobsAction() {
   try {
+    const auth = await requireAdminOrHRSession();
+    if (!auth.authorized) return [];
+
     return await prisma.job.findMany({
       where: {
         isActive: false,
       },
       include: {
-        postedByUser: true,
+        postedByUser: {
+          select: {
+            id: true,
+            fullName: true,
+            username: true,
+          },
+        },
       },
       orderBy: {
         killedAt: "desc",

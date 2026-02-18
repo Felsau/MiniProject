@@ -1,36 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth/authOptions";
 import { prisma } from "@/lib/db/prisma";
-
-// ============================================
-// Bookmark API — TODO: ต้องสร้าง SavedJob model ใน Prisma ก่อนใช้งาน
-// ============================================
-//
-// ขั้นตอนเปิดใช้งาน:
-// 1. เพิ่ม SavedJob model ใน prisma/schema.prisma:
-//
-//    model SavedJob {
-//      id        String   @id @default(cuid())
-//      userId    String
-//      user      User     @relation("savedJobs", fields: [userId], references: [id])
-//      jobId     String
-//      job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
-//      createdAt DateTime @default(now())
-//      @@unique([userId, jobId])
-//      @@map("SavedJob")
-//    }
-//
-// 2. เพิ่ม relation ใน User model:
-//    savedJobs SavedJob[] @relation("savedJobs")
-//
-// 3. เพิ่ม relation ใน Job model:
-//    savedBy   SavedJob[]
-//
-// 4. รัน: npx prisma migrate dev --name add_saved_job
-//
-// 5. Uncomment โค้ดด้านล่างแล้วลบ placeholder response
-// ============================================
 
 /**
  * GET /api/bookmark — ดึงรายการงานที่บันทึกไว้ของ user ปัจจุบัน
