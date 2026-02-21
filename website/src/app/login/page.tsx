@@ -27,12 +27,10 @@ export default function LoginPage() {
         setError("ชื่อผู้ใช้ หรือ รหัสผ่านไม่ถูกต้อง")
         setLoading(false)
       } else {
-        // ดึง session เพื่อเช็ค role
         const sessionRes = await fetch("/api/auth/session")
         const session = await sessionRes.json()
         const userRole = session?.user?.role
         
-        // Redirect ตาม role
         if (userRole === "USER") {
           router.push("/jobs")
         } else {
@@ -66,7 +64,6 @@ export default function LoginPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
-            {/* 👇 เพิ่ม text-gray-900 ตรงนี้ครับ */}
             <input 
               type="text" 
               required
@@ -78,7 +75,6 @@ export default function LoginPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            {/* 👇 เพิ่ม text-gray-900 ตรงนี้ด้วยครับ */}
             <input 
               type="password" 
               required

@@ -6,17 +6,6 @@ import Link from "next/link";
 import { JobCard } from "@/components/recruitment/JobCard";
 import type { JobWithCount } from "@/types";
 
-// TODO: สร้าง SavedJob model ใน Prisma schema ก่อนใช้งาน
-// model SavedJob {
-//   id        String   @id @default(cuid())
-//   userId    String
-//   user      User     @relation(fields: [userId], references: [id])
-//   jobId     String
-//   job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
-//   createdAt DateTime @default(now())
-//   @@unique([userId, jobId])
-// }
-
 interface SavedJob {
   id: string;
   createdAt: string;
@@ -78,13 +67,11 @@ export default function BookmarksPage() {
   return (
     <div className="min-h-screen p-8 bg-gray-50">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">งานที่เล็งไว้</h1>
           <p className="text-gray-600">รายการงานที่คุณบันทึกไว้ ({savedJobs.length} รายการ)</p>
         </div>
 
-        {/* Bookmarked Jobs */}
         {savedJobs.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200">
             <div className="p-10 text-center">
@@ -106,7 +93,6 @@ export default function BookmarksPage() {
                   job={saved.job}
                   userRole="USER"
                 />
-                {/* ปุ่มลบ bookmark */}
                 <button
                   onClick={() => handleRemoveBookmark(saved.id, saved.job?.id || '')}
                   disabled={removingId === saved.id}

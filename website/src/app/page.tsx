@@ -27,10 +27,8 @@ export default function Home() {
         setError("ชื่อผู้ใช้ หรือ รหัสผ่านไม่ถูกต้อง");
         setLoading(false);
       } else {
-        // ดึง session เพื่อเช็ค role (สามารถขยายเพิ่มเติมได้ในอนาคต)
         await fetch("/api/auth/session");
         
-        // Redirect ตาม role — ทุก role ไปที่ dashboard
         router.push("/dashboard");
         router.refresh();
       }
@@ -43,7 +41,6 @@ export default function Home() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-600 via-indigo-600 to-purple-700 p-4 relative overflow-hidden">
       
-      {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
@@ -51,7 +48,6 @@ export default function Home() {
       </div>
 
       <div className="relative w-full max-w-md">
-        {/* Logo & Branding */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-2xl mb-6 transform hover:scale-105 transition-transform">
             <Building2 size={40} className="text-blue-600" />
@@ -62,7 +58,6 @@ export default function Home() {
           <p className="text-blue-100 text-lg">ระบบจัดหางานภายในองค์กร</p>
         </div>
 
-        {/* Login Card */}
         <div className="bg-white/95 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-white/20">
           
           <div className="mb-6">
@@ -130,7 +125,6 @@ export default function Home() {
             </button>
           </form>
 
-          {/* Test Credentials */}
           <div className="mt-6 pt-6 border-t border-gray-200">
             <p className="text-center text-sm text-gray-600 mb-3">
               🔑 ข้อมูลทดสอบ (Test Accounts)
@@ -153,7 +147,6 @@ export default function Home() {
 
         </div>
 
-        {/* Footer */}
         <p className="text-center text-white/70 text-sm mt-6">
           © 2026 Internal Job Portal. All rights reserved.
         </p>
