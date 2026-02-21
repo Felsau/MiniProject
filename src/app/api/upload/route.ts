@@ -47,10 +47,10 @@ export async function POST(req: Request) {
     // อัปโหลดไปยัง Google Drive
     // สร้างไฟล์ใหม่จาก buffer เพื่อส่งไป Uploadcare
     const uploadcareFile = new File([buffer], fileName, { type: file.type });
-    const uploadcareUrl = await uploadToUploadcare(uploadcareFile);
-    console.log("[UPLOAD] Success:", uploadcareUrl);
+    const uploadcareResult = await uploadToUploadcare(uploadcareFile);
+    console.log("[UPLOAD] Success:", uploadcareResult);
     return NextResponse.json(
-      { success: true, url: uploadcareUrl, fileName },
+      { success: true, ...uploadcareResult, fileName },
       { status: 201 }
     );
   } catch (error) {
