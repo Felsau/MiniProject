@@ -30,8 +30,7 @@ export default function Sidebar() {
 
   return (
     <div className="fixed left-0 top-0 w-72 h-screen bg-white shadow-2xl flex flex-col overflow-y-auto z-40">
-      {/* Decorative Background */}
-      <div className="absolute top-0 left-0 w-full h-48 bg-linear-to-br from-indigo-700 via-indigo-600 to-blue-600 opacity-12 pointer-events-none"></div>
+  {/* Decorative Background removed so sidebar top stays white */}
 
       <div className="relative p-6 border-b border-gray-100 z-10">
         <div className="flex items-center gap-3 mb-2">
