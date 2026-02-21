@@ -19,7 +19,12 @@ export async function uploadToUploadcare(file: File): Promise<{ cdnUrl: string; 
   const uuid = data.file;
   const filename = file.name;
   const cdnUrl = `https://ucarecdn.com/${uuid}/`;
-  const subdomainUrl = `https://${uuid.substring(0,12)}.ucarecd.net/${uuid}/${filename}`;
+  // หากต้องการใช้ subdomain เฉพาะของบัญชี (เช่น 4ouhv8kt55.ucarecd.net)
+  // ให้ตั้งค่า UPLOADCARE_CDN_SUBDOMAIN ใน .env เป็นชื่อ subdomain นั้น
+  const cdnSubdomain = process.env.UPLOADCARE_CDN_SUBDOMAIN;
+  const subdomainUrl = cdnSubdomain
+    ? `https://${cdnSubdomain}.ucarecd.net/${uuid}/${filename}`
+    : `https://${uuid.substring(0,12)}.ucarecd.net/${uuid}/${filename}`;
   return {
     cdnUrl,
     subdomainUrl,

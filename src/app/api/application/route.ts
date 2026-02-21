@@ -42,7 +42,28 @@ export async function POST(req: Request) {
     if (!session?.user?.name) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
-    const { jobId, resumeUrl } = body;
+    let { jobId, resumeUrl } = body;
+
+    // Normalize Uploadcare URL to use account subdomain if provided
+    const normalizeUploadcareUrl = (url?: string | null) => {
+      if (!url) return url;
+      try {
+        // extract uuid and optional filename
+        const m = url.match(/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})(?:\/([^?#]+))?/);
+        if (!m) return url;
+        const uuid = m[1];
+        const filename = m[2] || '';
+        const cdnSub = process.env.UPLOADCARE_CDN_SUBDOMAIN;
+        if (cdnSub) {
+          return `https://${cdnSub}.ucarecd.net/${uuid}${filename ? `/${filename}` : ''}`;
+        }
+        return `https://ucarecdn.com/${uuid}/`;
+      } catch (e) {
+        return url;
+      }
+    };
+
+    resumeUrl = normalizeUploadcareUrl(resumeUrl);
 
     if (!jobId) return NextResponse.json({ error: "Missing jobId" }, { status: 400 });
 
