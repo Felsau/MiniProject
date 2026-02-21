@@ -1,9 +1,9 @@
 import { getServerSession } from "next-auth"
-import { authOptions } from "../api/auth/[...nextauth]/route"
+import { authOptions } from "@/lib/auth/authOptions"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/db/prisma"
 import Link from "next/link"
-import { ArrowLeft, User, Briefcase, Calendar, Shield, Mail, Phone, FileText, MapPin, Award } from "lucide-react"
+import { ArrowLeft, User, Briefcase, Calendar, Shield, Mail, Phone, FileText, MapPin, Award, Pencil } from "lucide-react"
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions)
@@ -19,14 +19,18 @@ export default async function ProfilePage() {
 
   if (!user) return <div>ไม่พบข้อมูล</div>
 
-  // เช็คว่า "เป็นคนลงประกาศงานได้ไหม?"
   const isRecruiter = user.role === 'ADMIN' || user.role === 'HR';
   const activeJobsCount = user.jobs.filter(job => job.isActive).length;
+
+  const totalApplicants = isRecruiter
+    ? await prisma.application.count({
+        where: { job: { postedBy: user.id } },
+      })
+    : 0;
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 md:p-12">
       
-      {/* Header */}
       <div className="max-w-6xl mx-auto mb-8">
         <Link href="/dashboard" className="inline-flex items-center gap-2 text-gray-600 hover:text-blue-600 transition font-medium">
           <ArrowLeft size={20} /> กลับแดชบอร์ด
@@ -35,17 +39,13 @@ export default async function ProfilePage() {
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* 🟢 ฝั่งซ้าย: ข้อมูลส่วนตัว */}
         <div className="lg:col-span-1 space-y-6">
           
-          {/* Card 1: รูปและข้อมูลติดต่อ */}
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden card-hover">
-            {/* Header Gradient */}
             <div className="h-32 bg-linear-to-br from-blue-600 via-indigo-600 to-purple-600 relative">
               <div className="absolute inset-0 bg-black/10"></div>
             </div>
             
-            {/* Profile Section */}
             <div className="px-6 pb-6 -mt-16 relative z-10">
               <div className="w-28 h-28 bg-linear-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mb-4 border-4 border-white shadow-xl mx-auto">
                 <User size={48} className="text-white" />
@@ -68,7 +68,6 @@ export default async function ProfilePage() {
                 </span>
               </div>
 
-              {/* Contact Info */}
               <div className="space-y-3 bg-linear-to-br from-gray-50 to-blue-50 rounded-xl p-4 border border-gray-100">
                 <div className="flex items-center gap-3 text-gray-700 text-sm">
                   <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
@@ -82,6 +81,13 @@ export default async function ProfilePage() {
                   </div>
                   <span>{user.phone || "-"}</span>
                 </div>
+              </div>
+
+              <div className="mt-4">
+                <Link href="/profile/edit" className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl font-semibold text-sm">
+                  <Pencil size={16} />
+                  แก้ไขโปรไฟล์
+                </Link>
               </div>
             </div>
           </div>
@@ -99,10 +105,8 @@ export default async function ProfilePage() {
 
         </div>
 
-        {/* 🔵 ฝั่งขวา: แยกตาม Role */}
         <div className="lg:col-span-2 space-y-6">
           
-          {/* กรณี ADMIN / HR */}
           {isRecruiter ? (
             <>
               {/* Stats Cards */}
@@ -129,7 +133,7 @@ export default async function ProfilePage() {
                   <div className="absolute top-0 right-0 w-24 h-24 bg-linear-to-br from-purple-500/10 to-pink-500/10 rounded-full -mr-12 -mt-12"></div>
                   <div className="relative z-10">
                     <p className="text-gray-500 text-sm font-semibold mb-2 uppercase tracking-wide">ผู้สมัครทั้งหมด</p>
-                    <p className="text-4xl font-bold text-purple-600 mb-1">0</p>
+                    <p className="text-4xl font-bold text-purple-600 mb-1">{totalApplicants}</p>
                     <p className="text-xs text-gray-400">คน</p>
                   </div>
                 </div>
@@ -192,7 +196,6 @@ export default async function ProfilePage() {
               </div>
             </>
           ) : (
-            // กรณี USER ทั่วไป
             <>
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                 <div className="p-6 border-b border-gray-100 bg-linear-to-r from-gray-50 to-blue-50">

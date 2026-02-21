@@ -1,4 +1,3 @@
-// src/actions/getJobs.ts
 'use server'
 
 import { prisma } from "@/lib/db/prisma"
@@ -9,13 +8,11 @@ export async function getJobs(page: number = 1, query: string = "") {
   try {
     const skip = (page - 1) * ITEMS_PER_PAGE;
 
-    // ดึงข้อมูลพร้อมกัน 2 อย่าง: ข้อมูลงาน และ จำนวนงานทั้งหมด
     const [jobs, totalCount] = await Promise.all([
       prisma.job.findMany({
         skip,
         take: ITEMS_PER_PAGE,
         where: {
-          // ใส่เงื่อนไข Search/Filter ตรงนี้
           title: { contains: query},
           isActive: true, 
         },

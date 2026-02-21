@@ -1,16 +1,12 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth/authOptions";
 import { prisma } from "@/lib/db/prisma";
 
-// ✅ Type สำหรับ Params (Next.js 15)
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
-// ============================================
-// GET - ดึงข้อมูลงานรายตัว
-// ============================================
 export async function GET(
   req: Request,
   { params }: RouteParams
@@ -42,37 +38,49 @@ export async function GET(
   }
 }
 
-// ============================================
-// PATCH - รวมพลัง: แก้ไขข้อมูล + ปิด/เปิดงาน
-// ============================================
 export async function PATCH(
   req: Request,
   { params }: RouteParams
 ) {
   try {
-    const { id } = await params; // ✅ Await ID ก่อนเสมอ
+    const { id } = await params;
     const session = await getServerSession(authOptions);
 
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const user = await prisma.user.findUnique({
+      where: { username: session.user.name as string },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "ไม่พบข้อมูลผู้ใช้" }, { status: 404 });
+    }
+    if (user.role !== "ADMIN" && user.role !== "HR") {
+      return NextResponse.json({ error: "คุณไม่มีสิทธิ์แก้ไขประกาศงาน" }, { status: 403 });
+    }
+
+    const job = await prisma.job.findUnique({ where: { id } });
+    if (!job) {
+      return NextResponse.json({ error: "ไม่พบตำแหน่งงาน" }, { status: 404 });
+    }
+    if (job.postedBy !== user.id && user.role !== "ADMIN") {
+      return NextResponse.json({ error: "คุณไม่มีสิทธิ์แก้ไขงานของคนอื่น" }, { status: 403 });
+    }
+
     const body = await req.json();
     
-    // ตรวจสอบว่าเป็นคำสั่ง Kill/Restore หรือไม่?
     const isStatusAction = body.action === "kill" || body.action === "restore";
 
-    // เตรียมข้อมูลที่จะอัปเดต (Update Data)
     let updateData: Record<string, unknown> = {};
 
     if (isStatusAction) {
-      // 👉 กรณี 1: สั่งปิด/เปิดงาน
       updateData = {
-        isActive: body.action === "restore", // restore = true, kill = false
+        isActive: body.action === "restore",
         killedAt: body.action === "kill" ? new Date() : null,
       };
     } else {
-      // 👉 กรณี 2: แก้ไขข้อมูลทั่วไป (Edit Job)
       updateData = {
         title: body.title,
         description: body.description,
@@ -86,7 +94,6 @@ export async function PATCH(
       };
     }
 
-    // อัปเดตลง Database
     const updatedJob = await prisma.job.update({
       where: { id },
       data: updateData,
@@ -107,9 +114,6 @@ export async function PATCH(
   }
 }
 
-// ============================================
-// DELETE - ลบงานถาวร
-// ============================================
 export async function DELETE(
   req: Request,
   { params }: RouteParams
@@ -118,7 +122,23 @@ export async function DELETE(
     const { id } = await params;
     const session = await getServerSession(authOptions);
 
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session?.user?.name) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const user = await prisma.user.findUnique({
+      where: { username: session.user.name as string },
+    });
+
+    if (!user) return NextResponse.json({ error: "ไม่พบข้อมูลผู้ใช้" }, { status: 404 });
+
+    if (user.role !== "ADMIN" && user.role !== "HR") {
+      return NextResponse.json({ error: "คุณไม่มีสิทธิ์ลบประกาศงาน" }, { status: 403 });
+    }
+
+    const job = await prisma.job.findUnique({ where: { id } });
+    if (!job) return NextResponse.json({ error: "ไม่พบตำแหน่งงาน" }, { status: 404 });
+    if (job.postedBy !== user.id && user.role !== "ADMIN") {
+      return NextResponse.json({ error: "คุณไม่มีสิทธิ์ลบงานของคนอื่น" }, { status: 403 });
+    }
 
     await prisma.job.delete({ where: { id } });
 

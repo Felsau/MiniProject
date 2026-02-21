@@ -6,7 +6,6 @@ import { prisma } from "@/lib/db/prisma";
  */
 export async function GET() {
   try {
-    // Get unique departments and locations in parallel
     const [departmentRows, locationRows] = await Promise.all([
       prisma.job.findMany({
         where: { isActive: true },

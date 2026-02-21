@@ -3,12 +3,11 @@
 import { useEffect, useState, use } from "react";
 import {
     User, Mail, Calendar, ArrowLeft, CheckCircle, XCircle, Loader2,
-    Eye, // ✅ นำ Eye กลับมา
+    Eye,
     ChevronDown
 } from "lucide-react";
 import Link from "next/link";
 
-// กำหนดสีของสถานะ
 const statusColors: Record<string, string> = {
     PENDING: "bg-yellow-100 text-yellow-700 border-yellow-200",
     INTERVIEW: "bg-blue-100 text-blue-700 border-blue-200",
@@ -155,7 +154,6 @@ export default function ApplicantsPage({ params }: { params: Promise<{ id: strin
                                                     <Loader2 size={18} className="animate-spin text-gray-400" />
                                                 ) : (
                                                     <>
-                                                        {/* ✅ ปุ่มดูโปรไฟล์เป็นรูปตา (Eye) */}
                                                         <Link
                                                             href={`/profile/${app.user.id}`}
                                                             className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition"
@@ -166,7 +164,6 @@ export default function ApplicantsPage({ params }: { params: Promise<{ id: strin
 
                                                         <div className="w-px h-4 bg-gray-200 mx-1"></div>
 
-                                                        {/* Quick Actions (แสดงเฉพาะตอน Pending) */}
                                                         {app.status === 'PENDING' && (
                                                             <>
                                                                 <button
@@ -186,7 +183,6 @@ export default function ApplicantsPage({ params }: { params: Promise<{ id: strin
                                                             </>
                                                         )}
 
-                                                        {/* ปุ่ม Dropdown แบบมีข้อความ "เปลี่ยน" */}
                                                         <div className="relative">
                                                             <button
                                                                 onClick={(e) => {

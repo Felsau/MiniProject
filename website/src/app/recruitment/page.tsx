@@ -1,107 +1,63 @@
-"use client";
-
 import { getServerSession } from "next-auth";
-import { authOptions } from "../api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth/authOptions";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
-import JobList from "@/components/recruitment/JobList";
 import AddJobModal from "@/components/recruitment/AddJobModal";
 import Pagination from "@/components/ui/Pagination";
 import { Briefcase, Users, Filter, TrendingUp } from "lucide-react";
 import { JobWithCount } from "@/types";
-import { useBookmark } from "@/hooks/useBookmark";
-import { useEffect, useState } from "react";
+import RecruitmentClientWrapper from "@/components/recruitment/RecruitmentClientWrapper";
 
-// Type ให้รองรับ Next.js 15
 type Props = {
   searchParams: Promise<{ page?: string }>;
 };
 
-export default function RecruitmentPage(props: Props) {
-  const [session, setSession] = useState<any>(null);
-  const [userRole, setUserRole] = useState<string | undefined>(undefined);
-  const [jobs, setJobs] = useState<JobWithCount[]>([]);
-  const [totalJobCount, setTotalJobCount] = useState(0);
-  const [fullTimeCount, setFullTimeCount] = useState(0);
-  const [partTimeCount, setPartTimeCount] = useState(0);
-  const [contractCount, setContractCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState(true);
+export default async function RecruitmentPage(props: Props) {
+  const session = await getServerSession(authOptions);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const sessionData = await getServerSession(authOptions);
-        if (!sessionData) {
-          redirect("/");
-          return;
-        }
-
-        setSession(sessionData);
-        setUserRole((sessionData.user as { role?: string })?.role);
-
-        // รอรับค่า Page จาก URL
-        const searchParams = await props.searchParams;
-        const currentPage = Number(searchParams?.page) || 1;
-        const itemsPerPage = 6;
-        const skip = (currentPage - 1) * itemsPerPage;
-
-        // ใช้ Promise.all ดึงข้อมูลพร้อมกัน
-        const [jobsData, totalJobCountData, fullTimeCountData, partTimeCountData, contractCountData] = await Promise.all([
-          prisma.job.findMany({
-            take: itemsPerPage,
-            skip: skip,
-            include: {
-              postedByUser: {
-                select: {
-                  fullName: true,
-                  username: true,
-                },
-              },
-              _count: {
-                select: {
-                  applications: true,
-                },
-              },
-            },
-            orderBy: [
-              { createdAt: "desc" },
-              { id: "desc" }
-            ],
-          }),
-          prisma.job.count(),
-          prisma.job.count({ where: { employmentType: "FULL_TIME" } }),
-          prisma.job.count({ where: { employmentType: "PART_TIME" } }),
-          prisma.job.count({ where: { employmentType: "CONTRACT" } }),
-        ]);
-
-        setJobs(jobsData);
-        setTotalJobCount(totalJobCountData);
-        setFullTimeCount(fullTimeCountData);
-        setPartTimeCount(partTimeCountData);
-        setContractCount(contractCountData);
-        setTotalPages(Math.ceil(totalJobCountData / itemsPerPage));
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
+  if (!session) {
+    redirect("/");
   }
+
+  const userRole = (session.user as { role?: string })?.role;
+
+  const searchParams = await props.searchParams;
+  const currentPage = Number(searchParams?.page) || 1;
+  const itemsPerPage = 6;
+  const skip = (currentPage - 1) * itemsPerPage;
+
+  const [jobs, totalJobCount, fullTimeCount, partTimeCount, contractCount] = await Promise.all([
+    prisma.job.findMany({
+      take: itemsPerPage,
+      skip: skip,
+      include: {
+        postedByUser: {
+          select: {
+            fullName: true,
+            username: true,
+          },
+        },
+        _count: {
+          select: {
+            applications: true,
+          },
+        },
+      },
+      orderBy: [
+        { createdAt: "desc" },
+        { id: "desc" }
+      ],
+    }),
+    prisma.job.count(),
+    prisma.job.count({ where: { employmentType: "FULL_TIME" } }),
+    prisma.job.count({ where: { employmentType: "PART_TIME" } }),
+    prisma.job.count({ where: { employmentType: "CONTRACT" } }),
+  ]);
+
+  const totalPages = Math.ceil(totalJobCount / itemsPerPage);
 
   return (
     <div className="min-h-screen p-8 bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -111,15 +67,12 @@ export default function RecruitmentPage(props: Props) {
             <p className="text-gray-600 text-lg">จัดการตำแหน่งงานและรับสมัครพนักงานใหม่</p>
           </div>
           
-          {/* ปุ่มเพิ่มงาน */}
           <AddJobModal />
         </div>
       </div>
 
-      {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         
-        {/* Card 1: งานทั้งหมด */}
         <div className="card-hover bg-white rounded-2xl shadow-lg p-6 border border-gray-100 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-br from-blue-500/10 to-indigo-500/10 rounded-full -mr-16 -mt-16"></div>
           <div className="relative z-10">
@@ -137,7 +90,6 @@ export default function RecruitmentPage(props: Props) {
           </div>
         </div>
 
-        {/* Card 2: Full-time */}
         <div className="card-hover bg-white rounded-2xl shadow-lg p-6 border border-gray-100 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-br from-blue-500/10 to-cyan-500/10 rounded-full -mr-16 -mt-16"></div>
           <div className="relative z-10">
@@ -156,7 +108,6 @@ export default function RecruitmentPage(props: Props) {
           </div>
         </div>
 
-        {/* Card 3: Part-time */}
         <div className="card-hover bg-white rounded-2xl shadow-lg p-6 border border-gray-100 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-br from-green-500/10 to-emerald-500/10 rounded-full -mr-16 -mt-16"></div>
           <div className="relative z-10">
@@ -175,7 +126,6 @@ export default function RecruitmentPage(props: Props) {
           </div>
         </div>
 
-        {/* Card 4: Contract */}
         <div className="card-hover bg-white rounded-2xl shadow-lg p-6 border border-gray-100 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-br from-purple-500/10 to-pink-500/10 rounded-full -mr-16 -mt-16"></div>
           <div className="relative z-10">
@@ -195,7 +145,6 @@ export default function RecruitmentPage(props: Props) {
         </div>
       </div>
 
-      {/* Job List Section */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
         <div className="p-6 border-b border-gray-100 bg-linear-to-r from-gray-50 to-blue-50">
           <div className="flex items-center justify-between">
@@ -211,40 +160,16 @@ export default function RecruitmentPage(props: Props) {
         </div>
         
         <div className="p-6">
-          {/* List แสดงงาน (เฉพาะหน้าปัจจุบัน) */}
           <RecruitmentClientWrapper 
-            jobs={jobs} 
+            jobs={JSON.parse(JSON.stringify(jobs)) as JobWithCount[]} 
             userRole={userRole} 
           />
           
-          {/* Pagination Component */}
           <div className="mt-8 pt-6 border-t border-gray-100">
              <Pagination totalPages={totalPages} />
           </div>
         </div>
       </div>
     </div>
-  );
-}
-
-function RecruitmentClientWrapper({ jobs, userRole }: { jobs: JobWithCount[], userRole?: string }) {
-  const { bookmarkedJobIds, handleBookmark, handleUnbookmark, loading } = useBookmark();
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  return (
-    <JobList 
-      jobs={jobs} 
-      userRole={userRole}
-      bookmarkedJobIds={bookmarkedJobIds}
-      onBookmark={handleBookmark}
-      onUnbookmark={handleUnbookmark}
-    />
   );
 }

@@ -3,7 +3,6 @@ import { useState } from "react";
 export function useJobActions() {
   const [loadingJobId, setLoadingJobId] = useState<string | null>(null);
 
-  // ฟังก์ชันกลางสำหรับยิง API
   const updateJobStatus = async (jobId: string, action: "kill" | "restore") => {
     setLoadingJobId(jobId);
     try {
@@ -24,23 +23,20 @@ export function useJobActions() {
     }
   };
 
-  // ✅ 1. ปุ่มปิดงาน (Kill) -> ถามยืนยัน
   const handleKillJob = async (jobId: string): Promise<boolean> => {
     if (!confirm("คุณต้องการ 'ปิด' รับสมัครงานนี้ใช่หรือไม่?")) {
-      return false; // ถ้ากด Cancel ก็จบเลย
+      return false;
     }
     return await updateJobStatus(jobId, "kill");
   };
 
-  // ✅ 2. ปุ่มเปิดงานคืน (Restore) -> ถามยืนยัน (ตามที่ขอครับ)
   const handleRestoreJob = async (jobId: string): Promise<boolean> => {
     if (!confirm("คุณต้องการ 'เปิด' รับสมัครงานนี้อีกครั้งใช่หรือไม่?")) {
-      return false; // ถ้ากด Cancel ก็จบเลย
+      return false;
     }
     return await updateJobStatus(jobId, "restore");
   };
 
-  // ✅ 3. ปุ่มลบ (Delete) -> ถามยืนยัน
   const handleDeleteJob = async (jobId: string): Promise<boolean> => {
     if (!confirm("⚠️ ลบถาวร: คุณแน่ใจหรือไม่ที่จะลบงานนี้?\n(กู้คืนไม่ได้นะครับ)")) {
       return false;

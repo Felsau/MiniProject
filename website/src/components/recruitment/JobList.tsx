@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Briefcase, Search, Eye, EyeOff } from "lucide-react"; // ✅ เพิ่ม icon
+import { Briefcase, Search, Eye, EyeOff } from "lucide-react";
 import {EditJobModal} from "./EditJobModal";
 import { useRouter } from "next/navigation";
 import { useJobActions } from "@/hooks/useJobActions";
@@ -19,9 +19,8 @@ interface JobListProps {
 export function JobList({ jobs, userRole, bookmarkedJobIds, onBookmark, onUnbookmark }: JobListProps) {
   const router = useRouter();
 
-  // --- 1. เพิ่ม State สำหรับค้นหาและกรองกลับมา ---
   const [searchTerm, setSearchTerm] = useState("");
-  const [showInactive, setShowInactive] = useState(false); // ควบคุมการเปิด/ปิดงานที่นี่เลย
+  const [showInactive, setShowInactive] = useState(false);
 
   const [selectedJob, setSelectedJob] = useState<JobWithCount | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -36,20 +35,17 @@ export function JobList({ jobs, userRole, bookmarkedJobIds, onBookmark, onUnbook
   const handleJobAction = async (
     actionFn: (jobId: string) => Promise<boolean>,
     jobId: string
-  ): Promise<boolean> => { // <--- 1. ระบุว่าจะคืนค่า boolean
+  ): Promise<boolean> => {
     const success = await actionFn(jobId);
     if (success) {
       router.refresh();
     }
-    return success; // <--- 2. ต้องมีบรรทัดนี้! เพื่อส่งผลลัพธ์กลับไปให้ JobCard
+    return success;
   };
 
-  // --- ✅ 2. ใส่ Logic กรองข้อมูลกลับเข้าไป ---
   const filteredJobs = jobs.filter((job) => {
-    // กรอง 1: สถานะ Active/Inactive
     if (!showInactive && !job.isActive) return false;
 
-    // กรอง 2: คำค้นหา (Search)
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       return (
@@ -71,7 +67,6 @@ export function JobList({ jobs, userRole, bookmarkedJobIds, onBookmark, onUnbook
         </h2>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          {/* ช่องค้นหา */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
@@ -83,7 +78,6 @@ export function JobList({ jobs, userRole, bookmarkedJobIds, onBookmark, onUnbook
             />
           </div>
 
-          {/* ปุ่มแสดงงานที่ปิด */}
           <button
             onClick={() => setShowInactive(!showInactive)}
             className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border transition-all ${showInactive
@@ -97,7 +91,6 @@ export function JobList({ jobs, userRole, bookmarkedJobIds, onBookmark, onUnbook
         </div>
       </div>
 
-      {/* --- ส่วนแสดงรายการ (เหมือนเดิม) --- */}
       {filteredJobs.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm p-10 text-center border border-gray-200 border-dashed">
           <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -139,5 +132,4 @@ export function JobList({ jobs, userRole, bookmarkedJobIds, onBookmark, onUnbook
   );
 }
 
-// ถ้าคุณใช้ default export ในไฟล์นี้ ให้คงบรรทัดนี้ไว้
 export default JobList;
