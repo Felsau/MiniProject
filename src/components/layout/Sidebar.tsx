@@ -31,18 +31,18 @@ export default function Sidebar() {
   return (
     <div className="fixed left-0 top-0 w-72 h-screen bg-white shadow-2xl flex flex-col overflow-y-auto z-40">
       {/* Decorative Background */}
-      <div className="absolute top-0 left-0 w-full h-48 bg-linear-to-br from-blue-600 via-blue-500 to-indigo-600 opacity-10 pointer-events-none"></div>
-      
+      <div className="absolute top-0 left-0 w-full h-48 bg-linear-to-br from-indigo-700 via-indigo-600 to-blue-600 opacity-12 pointer-events-none"></div>
+
       <div className="relative p-6 border-b border-gray-100 z-10">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-12 h-12 bg-linear-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+          <div className="w-12 h-12 bg-linear-to-br from-indigo-700 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
             <Building2 size={24} className="text-white" />
           </div>
           <div>
-              <h1 className="text-xl font-bold bg-linear-to-r from-indigo-600 to-purple-700 bg-clip-text text-transparent">
-                ระบบจัดหางานภายในองค์กร
-              </h1>
-              <p className="text-xs text-gray-500 font-medium">ระบบภายในองค์กร</p>
+            <h1 className="text-xl font-bold bg-linear-to-r from-indigo-700 to-blue-600 bg-clip-text text-transparent">
+              ระบบจัดหางานภายในองค์กร
+            </h1>
+            <p className="text-xs text-gray-500 font-medium">ระบบภายในองค์กร</p>
           </div>
         </div>
       </div>
@@ -62,8 +62,8 @@ export default function Sidebar() {
                     group flex items-start gap-4 px-4 py-3.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer relative z-10
                     ${
                       isActive
-              ? "bg-linear-to-r from-indigo-600 to-purple-700 text-white shadow-lg shadow-indigo-700/30"
-                : "text-gray-700 hover:bg-linear-to-r hover:from-indigo-50 hover:to-purple-50 hover:shadow-md"
+                          ? "bg-linear-to-r from-indigo-700 to-blue-600 text-white shadow-lg shadow-indigo-700/30"
+                            : "text-gray-700 hover:bg-linear-to-r hover:from-indigo-50 hover:to-blue-50 hover:shadow-md"
                     }
                   `}
                 >
@@ -85,7 +85,7 @@ export default function Sidebar() {
         {/* User Info Card */}
         <div className="bg-linear-to-br from-blue-50 to-indigo-50 rounded-xl p-4 mb-3 border border-blue-100">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 bg-linear-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+            <div className="w-12 h-12 bg-linear-to-br from-indigo-700 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
               {session?.user?.name?.charAt(0).toUpperCase() || "A"}
             </div>
             <div className="flex-1 min-w-0">

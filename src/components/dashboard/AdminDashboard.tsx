@@ -37,7 +37,7 @@ export function AdminDashboard({
   recentApplications,
 }: AdminDashboardProps) {
   return (
-    <div className="min-h-screen p-8 bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen p-8 bg-white">
       <div className="mb-8">
         <h1 className="text-4xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
           Dashboard
