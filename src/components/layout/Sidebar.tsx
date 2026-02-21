@@ -39,10 +39,10 @@ export default function Sidebar() {
             <Building2 size={24} className="text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Internal Jobs
-            </h1>
-            <p className="text-xs text-gray-500 font-medium">ระบบจัดหางานภายใน</p>
+              <h1 className="text-xl font-bold bg-linear-to-r from-indigo-600 to-purple-700 bg-clip-text text-transparent">
+                ระบบจัดหางานภายในองค์กร
+              </h1>
+              <p className="text-xs text-gray-500 font-medium">ระบบภายในองค์กร</p>
           </div>
         </div>
       </div>
@@ -62,8 +62,8 @@ export default function Sidebar() {
                     group flex items-start gap-4 px-4 py-3.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer relative z-10
                     ${
                       isActive
-                        ? "bg-linear-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30"
-                        : "text-gray-700 hover:bg-linear-to-r hover:from-blue-50 hover:to-indigo-50 hover:shadow-md"
+              ? "bg-linear-to-r from-indigo-600 to-purple-700 text-white shadow-lg shadow-indigo-700/30"
+                : "text-gray-700 hover:bg-linear-to-r hover:from-indigo-50 hover:to-purple-50 hover:shadow-md"
                     }
                   `}
                 >

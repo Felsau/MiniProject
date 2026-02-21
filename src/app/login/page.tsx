@@ -51,7 +51,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <div className="bg-blue-600 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4 text-2xl">💼</div>
           <h1 className="text-2xl font-bold text-gray-800">เข้าสู่ระบบ</h1>
-          <p className="text-gray-500 text-sm">ยินดีต้อนรับสู่ระบบ Recruitment</p>
+          <p className="text-gray-500 text-sm">ยินดีต้อนรับสู่ระบบจัดหางานภายในองค์กร</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -94,7 +94,7 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-500">
-          ยังไม่มีบัญชี? <Link href="/register" className="text-blue-600 font-bold hover:underline">สมัครสมาชิก</Link>
+          หากต้องการบัญชีใหม่ โปรดติดต่อผู้ดูแลระบบ
         </p>
 
       </div>

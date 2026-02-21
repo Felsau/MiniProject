@@ -127,8 +127,7 @@ export default function Home() {
 
           <div className="mt-6 pt-6 border-t border-gray-200">
             <p className="text-center text-sm text-gray-600">
-              หากยังไม่มีบัญชี โปรดติดต่อผู้ดูแลระบบ หรือ
-              <a href="/register" className="text-blue-600 font-medium ml-1">สมัครสมาชิก</a>
+              หากยังไม่มีบัญชี โปรดติดต่อผู้ดูแลระบบเพื่อตรวจสอบสิทธิ์
             </p>
           </div>
 
